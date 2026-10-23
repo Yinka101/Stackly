@@ -49,7 +49,7 @@ export default function HeroSection() {
           <div className="flex flex-wrap gap-3">
             <a
               id="start"
-              href="/app"
+              href="/onboarding"
               className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-[var(--radius-2xl)] bg-[var(--color-primary)] text-white font-semibold text-lg min-h-[56px] hover:bg-[var(--color-primary-dark)] transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--color-primary)] focus-visible:outline-offset-2 shadow-md shadow-[var(--color-primary)]/25"
             >
               Start free
