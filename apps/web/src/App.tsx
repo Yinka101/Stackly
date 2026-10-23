@@ -22,6 +22,8 @@ import ParentLogin      from '@/pages/onboarding/ParentLogin';
 import LearnerHome      from '@/pages/app/LearnerHome';
 import ParentFamily     from '@/pages/app/ParentFamily';
 import Placeholder      from '@/pages/app/Placeholder';
+import PathMap          from '@/pages/app/learn/PathMap';
+import LessonReader     from '@/pages/app/learn/LessonReader';
 
 export default function App() {
   return (
@@ -52,7 +54,8 @@ export default function App() {
           {/* Learner-only routes */}
           <Route element={<RequireLearner />}>
             <Route path="/app/home"   element={<LearnerHome />} />
-            <Route path="/app/learn"  element={<Placeholder title="Lessons" coming="Lessons are coming next." />} />
+            <Route path="/app/learn"        element={<PathMap />} />
+            <Route path="/app/learn/:id"    element={<LessonReader />} />
             <Route path="/app/invest" element={<Placeholder title="Invest" coming="Paper trading portfolio is coming next." />} />
             <Route path="/app/paypal" element={<Placeholder title="PayPal Lab" coming="PayPal sandbox lab is coming next." />} />
             <Route path="/app/coach"  element={<Placeholder title="AI Coach" coming="Penny the AI coach is coming next." />} />
