@@ -1,4 +1,4 @@
-import Seedling from '../../assets/Seedling';
+import Seedling from '@/assets/Seedling';
 
 export default function LandingFooter() {
   const year = new Date().getFullYear();

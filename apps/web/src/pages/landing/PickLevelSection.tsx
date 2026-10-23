@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useFadeIn } from './useFadeIn';
-import { useTheme } from '../../lib/theme';
-import type { AgeBand } from '@stackly/shared';
+import { useTheme } from '@/lib/theme';
+import type { AgeBand } from '@/lib/theme';
 
 const BANDS: {
   id: AgeBand;

@@ -11,7 +11,7 @@ import LandingFooter from './landing/LandingFooter';
 
 export default function Landing() {
   return (
-    <div className="min-h-dvh bg-[var(--color-canvas)]">
+    <div className="min-h-dvh" style={{ background: 'var(--color-canvas)' }}>
       <LandingNav />
       <main>
         <HeroSection />

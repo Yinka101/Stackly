@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import Seedling from '../../assets/Seedling';
-import Button from '../../components/Button';
+import Seedling from '@/assets/Seedling';
 import GrowthSlider from './GrowthSlider';
 
 export default function HeroSection() {

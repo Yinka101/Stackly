@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import Seedling from '../../assets/Seedling';
+import Seedling from '@/assets/Seedling';
 
 const MESSAGES: { role: 'coach' | 'kid'; text: string }[] = [
   { role: 'kid', text: 'What is compound growth?' },

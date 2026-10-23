@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Seedling from '../../assets/Seedling';
-import { clsx } from '../../lib/clsx';
+import Seedling from '@/assets/Seedling';
+import { clsx } from '@/lib/clsx';
 
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);

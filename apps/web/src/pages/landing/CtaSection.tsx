@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useFadeIn } from './useFadeIn';
-import Seedling from '../../assets/Seedling';
+import Seedling from '@/assets/Seedling';
 
 export default function CtaSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
