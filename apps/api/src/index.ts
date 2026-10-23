@@ -12,6 +12,7 @@ import lessonsRouter from './routes/lessons.js';
 import portfolioRouter from './routes/portfolio.js';
 import paypalRouter from './routes/paypal.js';
 import aiRouter from './routes/ai.js';
+import investRouter from './routes/invest.js';
 import { sessionMiddleware } from './middleware/session.js';
 
 const app = new Hono();
@@ -35,6 +36,7 @@ app.route('/lessons', lessonsRouter);
 app.route('/portfolio', portfolioRouter);
 app.route('/paypal', paypalRouter);
 app.route('/ai', aiRouter);
+app.route('/invest', investRouter);
 
 app.notFound((c) => c.json({ error: 'not found' }, 404));
 

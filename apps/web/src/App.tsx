@@ -21,6 +21,7 @@ import ParentLogin      from '@/pages/onboarding/ParentLogin';
 
 // App screens
 import LearnerHome      from '@/pages/app/LearnerHome';
+import InvestPage       from '@/pages/app/InvestPage';
 import ParentFamily     from '@/pages/app/ParentFamily';
 import Placeholder      from '@/pages/app/Placeholder';
 import PathMap          from '@/pages/app/learn/PathMap';
@@ -69,7 +70,7 @@ export default function App() {
             <Route path="/app/home"          element={<LearnerHome />} />
             <Route path="/app/learn"         element={<PathMap />} />
             <Route path="/app/learn/:id"     element={<LessonReader />} />
-            <Route path="/app/invest"        element={<Placeholder title="Invest"     coming="Paper trading portfolio is coming next." />} />
+            <Route path="/app/invest"        element={<InvestPage />} />
             <Route path="/app/paypal"        element={<Placeholder title="PayPal Lab" coming="PayPal sandbox lab is coming next." />} />
             <Route path="/app/coach"         element={<Placeholder title="AI Coach"   coming="Penny the AI coach is coming next." />} />
           </Route>

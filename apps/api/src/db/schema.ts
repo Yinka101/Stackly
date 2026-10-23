@@ -60,6 +60,19 @@ export const trades = sqliteTable('trades', {
   side: text('side').notNull(),          // 'buy' | 'sell'
   shares: real('shares').notNull(),
   priceCents: integer('price_cents').notNull(),
+  reflection: text('reflection'),        // required "why am I buying this?"
+  replayDate: text('replay_date'),       // YYYY-MM-DD if in replay mode
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+});
+
+// ── Replay sessions ───────────────────────────────────────────────────────────
+export const replaySessions = sqliteTable('replay_sessions', {
+  id: text('id').primaryKey(),
+  learnerId: text('learner_id').notNull().references(() => learners.id),
+  startDate: text('start_date').notNull(),   // YYYY-MM-DD — replay start
+  currentDate: text('current_date').notNull(), // YYYY-MM-DD — current replay date
+  cashCents: integer('cash_cents').notNull().default(100000), // $1,000 start
+  active: integer('active', { mode: 'boolean' }).notNull().default(true),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
 });
 
