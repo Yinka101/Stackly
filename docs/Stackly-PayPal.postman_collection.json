@@ -1,0 +1,204 @@
+{
+  "info": {
+    "name": "Stackly — PayPal Sandbox",
+    "_postman_id": "stackly-paypal-v1",
+    "description": "Stackly PayPal Orders v2 sandbox integration.\n\nPre-requisites:\n1. Set the 'baseUrl' variable to your local server, e.g. http://localhost:3001\n2. Authenticate as a parent first (POST /auth/login-parent) and save the session cookie.\n3. The 'orderId' variable is auto-set by the 'Create Order' request via a test script.\n\nAll prices come from the server — never send an amount from the client.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",   "value": "http://localhost:3001",   "type": "string" },
+    { "key": "orderId",   "value": "",                        "type": "string" },
+    { "key": "learnerId", "value": "REPLACE_WITH_LEARNER_ID", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login as parent (demo)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login-parent", "host": ["{{baseUrl}}"], "path": ["auth","login-parent"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"parent@demo.stackly\",\n  \"password\": \"demo1234\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('login ok', () => pm.response.to.have.status(200));",
+                "const b = pm.response.json();",
+                "pm.collectionVariables.set('learnerId', b.learners?.[0]?.id ?? '');"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Kits",
+      "item": [
+        {
+          "name": "List practice kits",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/paypal/kits", "host": ["{{baseUrl}}"], "path": ["paypal","kits"] }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('status 200', () => pm.response.to.have.status(200));",
+                "pm.test('has kits array', () => {",
+                "  const b = pm.response.json();",
+                "  pm.expect(b.kits).to.be.an('array').with.length.greaterThan(0);",
+                "});"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create order — lemonade-stand kit ($3)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/paypal/orders", "host": ["{{baseUrl}}"], "path": ["paypal","orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kitId\": \"lemonade-stand\",\n  \"learnerId\": \"{{learnerId}}\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('status 200', () => pm.response.to.have.status(200));",
+                "const b = pm.response.json();",
+                "pm.test('has orderId', () => pm.expect(b.orderId).to.be.a('string'));",
+                "pm.test('has approveLink', () => pm.expect(b.approveLink).to.include('paypal.com'));",
+                "pm.collectionVariables.set('orderId', b.orderId);",
+                "console.log('orderId saved:', b.orderId);"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Create order — unknown kit (expect 400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/paypal/orders", "host": ["{{baseUrl}}"], "path": ["paypal","orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kitId\": \"nonexistent-kit\",\n  \"learnerId\": \"{{learnerId}}\"\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('400 for unknown kit', () => pm.response.to.have.status(400));"] }
+          }]
+        },
+        {
+          "name": "Get order status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/paypal/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["paypal","orders","{{orderId}}"]
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('status 200', () => pm.response.to.have.status(200));",
+                "const b = pm.response.json();",
+                "pm.test('has paypalStatus', () => pm.expect(b.paypalStatus).to.be.a('string'));"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Capture order (run AFTER buyer approves in PayPal sandbox)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/paypal/orders/{{orderId}}/capture",
+              "host": ["{{baseUrl}}"],
+              "path": ["paypal","orders","{{orderId}}","capture"]
+            },
+            "body": { "mode": "raw", "raw": "{}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('2xx response', () => pm.expect(pm.response.code).to.be.oneOf([200,402]));",
+                "const b = pm.response.json();",
+                "if (b.status === 'completed') {",
+                "  pm.test('awards PD', () => pm.expect(b.practiceDollarsAwarded).to.be.greaterThan(0));",
+                "}"
+              ]
+            }
+          }]
+        },
+        {
+          "name": "Capture duplicate (idempotency — expect alreadyCaptured)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/paypal/orders/{{orderId}}/capture",
+              "host": ["{{baseUrl}}"],
+              "path": ["paypal","orders","{{orderId}}","capture"]
+            },
+            "body": { "mode": "raw", "raw": "{}" }
+          },
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('200 with alreadyCaptured', () => {",
+                "  pm.response.to.have.status(200);",
+                "  pm.expect(pm.response.json().alreadyCaptured).to.be.true;",
+                "});"
+              ]
+            }
+          }]
+        }
+      ]
+    },
+    {
+      "name": "Webhook",
+      "item": [
+        {
+          "name": "Simulate PAYMENT.CAPTURE.COMPLETED (no sig check — dev only)",
+          "_comment": "Set PAYPAL_WEBHOOK_ID= (empty) in .env to bypass signature check during local testing",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/paypal/webhook", "host": ["{{baseUrl}}"], "path": ["paypal","webhook"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"EVT-SIMULATE-001\",\n  \"event_type\": \"PAYMENT.CAPTURE.COMPLETED\",\n  \"resource_type\": \"capture\",\n  \"resource\": {\n    \"id\": \"CAP-SIMULATE-001\",\n    \"status\": \"COMPLETED\",\n    \"amount\": { \"currency_code\": \"USD\", \"value\": \"3.00\" }\n  }\n}"
+            }
+          },
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["pm.test('received ok', () => pm.response.to.have.status(200));"] }
+          }]
+        }
+      ]
+    }
+  ]
+}

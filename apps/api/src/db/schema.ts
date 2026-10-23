@@ -78,13 +78,28 @@ export const replaySessions = sqliteTable('replay_sessions', {
 
 // ── PayPal sandbox top-up orders ─────────────────────────────────────────────
 export const paypalOrders = sqliteTable('paypal_orders', {
-  id: text('id').primaryKey(),           // PayPal order ID
+  id: text('id').primaryKey(),                    // PayPal order ID
+  requestId: text('request_id').notNull().unique(), // PayPal-Request-Id (idempotency)
+  kitId: text('kit_id').notNull(),
   learnerId: text('learner_id').notNull().references(() => learners.id),
   parentId: text('parent_id').notNull().references(() => users.id),
   amountUsd: real('amount_usd').notNull(),
   practiceDollarsAwarded: integer('practice_dollars_awarded').notNull(),
-  status: text('status').notNull().default('created'), // 'created'|'approved'|'captured'
+  xpAwarded: integer('xp_awarded').notNull().default(0),
+  captureId: text('capture_id'),                  // PayPal capture ID, set on COMPLETED
+  status: text('status').notNull().default('created'), // 'created'|'approved'|'completed'|'failed'
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  completedAt: integer('completed_at', { mode: 'timestamp_ms' }),
+});
+
+// ── PayPal webhook events (raw, for audit) ───────────────────────────────────
+export const webhookEvents = sqliteTable('webhook_events', {
+  id: text('id').primaryKey(),          // PayPal event id
+  eventType: text('event_type').notNull(),
+  resourceType: text('resource_type').notNull(),
+  resourceId: text('resource_id').notNull(),
+  verified: integer('verified', { mode: 'boolean' }).notNull().default(false),
+  processedAt: integer('processed_at', { mode: 'timestamp_ms' }).notNull(),
 });
 
 // ── AI chat history ──────────────────────────────────────────────────────────
