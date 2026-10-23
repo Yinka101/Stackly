@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base tokens (default = Builders, neutral) ───────────────────────────── */
+:root {
+  /* Canvas */
+  --color-canvas: #fdf8f2;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f5f0ea;
+  --color-border: #e8e0d4;
+
+  /* Text */
+  --color-ink: #1a2744;
+  --color-ink-muted: #5a6480;
+
+  /* Primary — leaf green */
+  --color-primary: #2d9e5f;
+  --color-primary-light: #e6f7ee;
+  --color-primary-dark: #1e7044;
+
+  /* Accent — sunny yellow */
+  --color-accent: #f5c842;
+  --color-accent-light: #fef9e7;
+
+  /* Semantic */
+  --color-danger: #e53e3e;
+  --color-success: #2d9e5f;
+
+  /* Shape */
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+
+  /* Spacing scale */
+  --space-base: 16px;
+
+  /* Typography */
+  --font-display: 'Baloo 2', cursive;
+  --font-body: 'Nunito', sans-serif;
+  --text-base: 18px;
+  --text-sm: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+}
+
+/* ── Sprouts theme — bigger, brighter, more rounded ─────────────────────── */
+[data-theme='sprouts'] {
+  --color-canvas: #fffbf0;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fff3d0;
+  --color-border: #fde68a;
+  --color-primary: #16a34a;
+  --color-primary-light: #dcfce7;
+  --color-accent: #f59e0b;
+  --color-accent-light: #fef3c7;
+  --radius-xl: 20px;
+  --radius-2xl: 32px;
+  --text-base: 20px;
+  --text-sm: 18px;
+  --text-lg: 24px;
+  --text-xl: 30px;
+  --text-2xl: 40px;
+  --text-3xl: 52px;
+}
+
+/* ── Investors theme — calmer, denser ───────────────────────────────────── */
+[data-theme='investors'] {
+  --color-canvas: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-surface-raised: #edf0f5;
+  --color-border: #d1d9e0;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
+  --color-primary: #1d6f42;
+  --color-primary-light: #d1fae5;
+  --color-accent: #d97706;
+  --color-accent-light: #fef3c7;
+  --radius-xl: 12px;
+  --radius-2xl: 18px;
+  --text-base: 16px;
+  --text-sm: 14px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+}
+
+/* ── Global base styles ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: var(--text-base); }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* Visible focus rings for keyboard nav */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Skeleton shimmer animation */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
