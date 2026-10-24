@@ -1,5 +1,5 @@
 /** Thin fetch wrapper — sends session token from localStorage as Bearer header. */
-// In production (Render static site) calls go directly to the API service.
+// In production (Render static site), VITE_API_URL points directly to the API service.
 // In dev the Vite proxy rewrites /api → http://localhost:3001.
 const BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}`
@@ -40,3 +40,16 @@ export const api = {
   patch: <T>(path: string, body: unknown) => req<T>('PATCH', path, body),
   del: <T>(path: string) => req<T>('DELETE', path),
 };
+
+/** Raw fetch — for SSE and non-JSON responses */
+export async function request(path: string, init?: RequestInit): Promise<Response> {
+  const token = tokenStore.get();
+  return fetch(`${BASE}${path}`, {
+    ...init,
+    credentials: 'include',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers ?? {}),
+    },
+  });
+}
