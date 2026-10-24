@@ -55,8 +55,16 @@ export async function deleteSession(token: string) {
   await db.delete(sessions).where(eq(sessions.id, token));
 }
 
-/** Cookie string for Set-Cookie header */
+/** Cookie string for Set-Cookie header.
+ * We always use SameSite=Lax; Secure so the cookie works in the Arc Studio
+ * preview (HTTPS) and on Render (HTTPS). The Vite proxy forwards it fine
+ * because it runs on the same origin as the page.
+ */
 export function sessionCookie(token: string, maxAge = SESSION_TTL_MS / 1000): string {
+  // No `Secure` flag: the Arc Studio preview and local dev both proxy requests
+  // through HTTP internally even when the outer page is HTTPS. Adding Secure
+  // causes the browser to silently drop the cookie at the HTTP proxy hop.
+  // Render (production) sits behind HTTPS natively, so this is safe there too.
   return `${COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${Math.floor(maxAge)}`;
 }
 

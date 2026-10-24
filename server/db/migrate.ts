@@ -65,17 +65,43 @@ sqlite.exec(`
     side TEXT NOT NULL,
     shares REAL NOT NULL,
     price_cents INTEGER NOT NULL,
+    reflection TEXT,
+    replay_date TEXT,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS replay_sessions (
+    id TEXT PRIMARY KEY,
+    learner_id TEXT NOT NULL REFERENCES learners(id),
+    start_date TEXT NOT NULL,
+    current_date TEXT NOT NULL,
+    cash_cents INTEGER NOT NULL DEFAULT 100000,
+    active INTEGER NOT NULL DEFAULT 1,
     created_at INTEGER NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS paypal_orders (
     id TEXT PRIMARY KEY,
+    request_id TEXT NOT NULL UNIQUE,
+    kit_id TEXT NOT NULL,
     learner_id TEXT NOT NULL REFERENCES learners(id),
     parent_id TEXT NOT NULL REFERENCES users(id),
     amount_usd REAL NOT NULL,
     practice_dollars_awarded INTEGER NOT NULL,
+    xp_awarded INTEGER NOT NULL DEFAULT 0,
+    capture_id TEXT,
     status TEXT NOT NULL DEFAULT 'created',
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    completed_at INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS webhook_events (
+    id TEXT PRIMARY KEY,
+    event_type TEXT NOT NULL,
+    resource_type TEXT NOT NULL,
+    resource_id TEXT NOT NULL,
+    verified INTEGER NOT NULL DEFAULT 0,
+    processed_at INTEGER NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS chat_messages (

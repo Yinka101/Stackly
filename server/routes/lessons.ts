@@ -1,187 +1,168 @@
 import { Hono } from 'hono';
-
-// Static lesson catalog — no DB needed for MVP
-// Content adapts per band in the AI coach; these are the structured stubs.
-
-export type Lesson = {
-  id: string;
-  title: string;
-  band: string;
-  topic: 'paypal' | 'investing' | 'money-basics';
-  durationMins: number;
-  summary: string;
-  steps: LessonStep[];
-};
-
-type LessonStep = {
-  heading: string;
-  body: string; // plain text, grade-appropriate per band
-  quiz?: { question: string; options: string[]; answer: number };
-};
-
-const LESSONS: Lesson[] = [
-  // ── Sprouts (grade 3) ──────────────────────────────────────
-  {
-    id: 'sp-paypal-1',
-    band: 'sprouts',
-    topic: 'paypal',
-    title: 'What Is PayPal?',
-    durationMins: 3,
-    summary: 'Learn how PayPal lets people send money safely over the internet.',
-    steps: [
-      {
-        heading: 'Money on the internet',
-        body: 'PayPal is like a piggy bank that lives on the internet. Your grown-up can put money in it and send it to friends or buy things safely.',
-        quiz: {
-          question: 'What does PayPal do?',
-          options: ['Makes pizza', 'Sends money safely online', 'Plays music'],
-          answer: 1,
-        },
-      },
-      {
-        heading: 'How a payment works',
-        body: 'When your grown-up wants to pay for something, they tap "Pay with PayPal". PayPal moves the money in a flash — no cash needed!',
-      },
-    ],
-  },
-  {
-    id: 'sp-invest-1',
-    band: 'sprouts',
-    topic: 'investing',
-    title: 'What Is Investing?',
-    durationMins: 4,
-    summary: 'Discover how money can grow over time like a plant.',
-    steps: [
-      {
-        heading: 'Seeds and money',
-        body: 'Imagine planting a seed. Over time it grows into a big tree. Investing is like planting your money. You wait, and it can grow bigger!',
-        quiz: {
-          question: 'Investing is most like:',
-          options: ['Spending all your coins now', 'Planting a seed and waiting', 'Giving money away'],
-          answer: 1,
-        },
-      },
-      {
-        heading: 'Practice Dollars',
-        body: 'In Stackly you use Practice Dollars to try investing. It is pretend money so you can learn without any risk.',
-      },
-    ],
-  },
-  // ── Builders (grade 6) ────────────────────────────────────
-  {
-    id: 'bu-paypal-1',
-    band: 'builders',
-    topic: 'paypal',
-    title: 'How PayPal Moves Money',
-    durationMins: 5,
-    summary: 'Understand the steps a PayPal payment takes from sender to receiver.',
-    steps: [
-      {
-        heading: 'The payment pipeline',
-        body: 'When you click Pay, PayPal checks your balance or card, deducts the amount, and sends an instant notification to the seller. The whole thing takes seconds.',
-        quiz: {
-          question: 'What happens first when you click Pay?',
-          options: ['Money arrives at seller', 'PayPal checks your balance', 'Bank sends a cheque'],
-          answer: 1,
-        },
-      },
-      {
-        heading: 'Buyer & seller protection',
-        body: 'PayPal keeps a record of every transaction. If something goes wrong, you can open a dispute. That record is why PayPal is trusted by millions of shoppers.',
-      },
-    ],
-  },
-  {
-    id: 'bu-invest-1',
-    band: 'builders',
-    topic: 'investing',
-    title: 'Stocks: Owning a Slice of a Company',
-    durationMins: 6,
-    summary: 'Learn what a stock is and why prices go up and down.',
-    steps: [
-      {
-        heading: 'What is a stock?',
-        body: 'A stock is a tiny piece of a company. If a company has 1,000 shares and you own 10, you own 1% of it. When the company does well, your shares are worth more.',
-        quiz: {
-          question: 'If you own 5 out of 100 shares, what percentage do you own?',
-          options: ['1%', '5%', '50%'],
-          answer: 1,
-        },
-      },
-      {
-        heading: 'Why prices change',
-        body: 'Stock prices move because of supply and demand. If lots of people want to buy a stock and few want to sell, the price goes up.',
-      },
-    ],
-  },
-  // ── Investors (grade 9) ───────────────────────────────────
-  {
-    id: 'in-paypal-1',
-    band: 'investors',
-    topic: 'paypal',
-    title: 'PayPal Under the Hood',
-    durationMins: 7,
-    summary: "Explore how PayPal's REST API powers payments — the same API you could build with.",
-    steps: [
-      {
-        heading: 'REST APIs and fintech',
-        body: 'PayPal exposes its payments engine through a REST API. Developers create an Order, the buyer approves it, and the developer captures the funds. Each step is a separate HTTP request with a JSON payload.',
-        quiz: {
-          question: 'Which step comes last in the PayPal Orders flow?',
-          options: ['Create order', 'Capture order', 'Buyer approval'],
-          answer: 1,
-        },
-      },
-      {
-        heading: 'OAuth 2.0 client credentials',
-        body: 'Before making any API call, your server exchanges its Client ID and Secret for a short-lived Bearer token. This keeps your credentials off the client.',
-      },
-    ],
-  },
-  {
-    id: 'in-invest-1',
-    band: 'investors',
-    topic: 'investing',
-    title: 'Diversification and Risk',
-    durationMins: 8,
-    summary: "Understand why spreading investments across assets reduces risk without killing returns.",
-    steps: [
-      {
-        heading: 'Correlation and portfolio theory',
-        body: "Harry Markowitz showed that combining assets with low correlation reduces a portfolio's total risk. When one asset falls, another may not — smoothing your overall return.",
-        quiz: {
-          question: 'Low-correlation assets in a portfolio tend to:',
-          options: ['Increase total risk', 'Reduce total risk', 'Have no effect on risk'],
-          answer: 1,
-        },
-      },
-      {
-        heading: 'The risk/return trade-off',
-        body: 'Higher potential returns almost always come with higher risk. Your job as an investor is to find the combination that fits your goals and timeline.',
-      },
-    ],
-  },
-];
+import { db } from '../db/index.js';
+import { lessonProgress, learners } from '../db/schema.js';
+import { eq, and } from 'drizzle-orm';
+import { PATHS, getLessonById, ALL_LESSONS } from '../data/lessons/index.js';
+import type { Band } from '../data/lessons/types.js';
+import { requireLearner } from '../middleware/session.js';
+import { nanoid } from '../utils/nanoid.js';
 
 const router = new Hono();
 
-// GET /lessons?band=sprouts
-router.get('/', (c) => {
-  const band = c.req.query('band');
-  const filtered = band ? LESSONS.filter((l) => l.band === band) : LESSONS;
-  // Return metadata only (no steps) in the list
-  return c.json(
-    filtered.map(({ id, title, band, topic, durationMins, summary }) => ({
-      id, title, band, topic, durationMins, summary,
-    }))
-  );
+// ── GET /lessons/paths ───────────────────────────────────────────────────────
+// Returns all paths with metadata and per-learner progress
+router.get('/paths', requireLearner, async (c) => {
+  const { actor } = c.var as { actor: { id: string; band: Band } };
+
+  const done = await db
+    .select({ lessonId: lessonProgress.lessonId, xpEarned: lessonProgress.xpEarned })
+    .from(lessonProgress)
+    .where(eq(lessonProgress.learnerId, actor.id));
+
+  const doneSet = new Set(done.map((d) => d.lessonId));
+
+  const paths = PATHS.map((path) => {
+    const lessons = path.lessons.map((lesson, idx) => {
+      const isUnlocked = idx === 0 || doneSet.has(path.lessons[idx - 1].id);
+      const isDone = doneSet.has(lesson.id);
+      const isCurrent = !isDone && isUnlocked;
+      return {
+        id: lesson.id,
+        order: lesson.order,
+        title: lesson.title,
+        emoji: lesson.emoji,
+        durationMins: lesson.durationMins,
+        xpReward: lesson.xpReward,
+        status: isDone ? 'done' : isCurrent ? 'current' : 'locked',
+      };
+    });
+    const totalXp = path.lessons.reduce((s, l) => s + l.xpReward, 0);
+    const earnedXp = done
+      .filter((d) => path.lessons.some((l) => l.id === d.lessonId))
+      .reduce((s, d) => s + d.xpEarned, 0);
+    return {
+      id: path.id,
+      title: path.title,
+      emoji: path.emoji,
+      description: path.description,
+      totalXp,
+      earnedXp,
+      lessons,
+    };
+  });
+
+  return c.json(paths);
 });
 
-// GET /lessons/:id
-router.get('/:id', (c) => {
-  const lesson = LESSONS.find((l) => l.id === c.req.param('id'));
+// ── GET /lessons/:id ─────────────────────────────────────────────────────────
+// Returns full lesson content for the learner's band
+router.get('/:id', requireLearner, async (c) => {
+  const { actor } = c.var as { actor: { id: string; band: Band } };
+  const lesson = getLessonById(c.req.param('id'));
   if (!lesson) return c.json({ error: 'lesson not found' }, 404);
-  return c.json(lesson);
+
+  const variant = lesson.variants[actor.band] ?? lesson.variants.builders;
+
+  // Check if already completed
+  const existing = await db
+    .select()
+    .from(lessonProgress)
+    .where(and(eq(lessonProgress.learnerId, actor.id), eq(lessonProgress.lessonId, lesson.id)))
+    .limit(1);
+
+  return c.json({
+    id: lesson.id,
+    pathId: lesson.pathId,
+    order: lesson.order,
+    title: lesson.title,
+    emoji: lesson.emoji,
+    durationMins: lesson.durationMins,
+    xpReward: lesson.xpReward,
+    alreadyCompleted: existing.length > 0,
+    ...variant,
+  });
 });
+
+// ── POST /lessons/:id/complete ───────────────────────────────────────────────
+router.post('/:id/complete', requireLearner, async (c) => {
+  const { actor } = c.var as { actor: { id: string; band: Band } };
+  const lessonId = c.req.param('id');
+  const lesson = getLessonById(lessonId);
+  if (!lesson) return c.json({ error: 'lesson not found' }, 404);
+
+  // Idempotent — do not award XP twice
+  const existing = await db
+    .select()
+    .from(lessonProgress)
+    .where(and(eq(lessonProgress.learnerId, actor.id), eq(lessonProgress.lessonId, lessonId)))
+    .limit(1);
+
+  if (existing.length > 0) {
+    return c.json({ ok: true, xpEarned: 0, alreadyCompleted: true });
+  }
+
+  await db.insert(lessonProgress).values({
+    id: nanoid(),
+    learnerId: actor.id,
+    lessonId,
+    completedAt: new Date(),
+    xpEarned: lesson.xpReward,
+  });
+
+  // Update learner XP and streak
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const learnerRow = await db
+    .select()
+    .from(learners)
+    .where(eq(learners.id, actor.id))
+    .limit(1);
+
+  if (learnerRow.length) {
+    const l = learnerRow[0];
+    const lastDate = l.lastActiveDate ?? '';
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const newStreak = lastDate === yesterday ? l.streakDays + 1
+      : lastDate === todayStr ? l.streakDays
+      : 1;
+
+    await db
+      .update(learners)
+      .set({ xp: l.xp + lesson.xpReward, streakDays: newStreak, lastActiveDate: todayStr })
+      .where(eq(learners.id, actor.id));
+  }
+
+  // Check for newly earned badges
+  const allProgress = await db
+    .select({ lessonId: lessonProgress.lessonId })
+    .from(lessonProgress)
+    .where(eq(lessonProgress.learnerId, actor.id));
+
+  const completedCount = allProgress.length;
+  const badges = computeBadges(completedCount, lessonId);
+
+  return c.json({ ok: true, xpEarned: lesson.xpReward, newBadges: badges });
+});
+
+// ── Badge logic ──────────────────────────────────────────────────────────────
+const PATH_COMPLETE_BADGES: Record<string, { id: string; label: string; emoji: string }> = {
+  'pp-06': { id: 'paypal-graduate', label: 'PayPal Graduate', emoji: '🎓' },
+  'inv-08': { id: 'investor-mindset', label: 'Investor Mindset', emoji: '🧠' },
+};
+
+const XP_BADGES: { threshold: number; id: string; label: string; emoji: string }[] = [
+  { threshold: 1,   id: 'first-step',    label: 'First Step',    emoji: '👣' },
+  { threshold: 5,   id: 'getting-going', label: 'Getting Going', emoji: '🏃' },
+  { threshold: 7,   id: 'halfway',       label: 'Halfway',       emoji: '🌗' },
+  { threshold: 14,  id: 'full-circle',   label: 'Full Circle',   emoji: '🌕' },
+];
+
+function computeBadges(completedCount: number, justCompletedId: string) {
+  const badges: { id: string; label: string; emoji: string }[] = [];
+  const countBadge = XP_BADGES.find((b) => b.threshold === completedCount);
+  if (countBadge) badges.push(countBadge);
+  const pathBadge = PATH_COMPLETE_BADGES[justCompletedId];
+  if (pathBadge) badges.push(pathBadge);
+  return badges;
+}
 
 export default router;
