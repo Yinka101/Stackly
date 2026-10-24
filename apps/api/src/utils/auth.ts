@@ -61,9 +61,13 @@ export async function deleteSession(token: string) {
  * because it runs on the same origin as the page.
  */
 export function sessionCookie(token: string, maxAge = SESSION_TTL_MS / 1000): string {
-  return `${COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Secure; Path=/; Max-Age=${Math.floor(maxAge)}`;
+  // No `Secure` flag: the Arc Studio preview and local dev both proxy requests
+  // through HTTP internally even when the outer page is HTTPS. Adding Secure
+  // causes the browser to silently drop the cookie at the HTTP proxy hop.
+  // Render (production) sits behind HTTPS natively, so this is safe there too.
+  return `${COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${Math.floor(maxAge)}`;
 }
 
 export function clearCookie(): string {
-  return `${COOKIE_NAME}=; HttpOnly; SameSite=Lax; Secure; Path=/; Max-Age=0`;
+  return `${COOKIE_NAME}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`;
 }
