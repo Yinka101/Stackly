@@ -36,8 +36,17 @@ export default function ParentRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col items-center p-6 pt-12">
+    <div className="min-h-screen bg-canvas flex flex-col items-center p-6 pt-8">
       <div className="w-full max-w-md">
+        {/* Back */}
+        <button onClick={() => nav(-1)}
+          className="flex items-center gap-1 text-ink/50 hover:text-ink text-sm mb-6 transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Back
+        </button>
+
         <h1 className="font-display text-2xl font-bold text-ink mb-1">Create your family account</h1>
         <p className="text-ink/60 mb-8">Your details — your child never sees or enters these.</p>
 
