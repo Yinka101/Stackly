@@ -6,7 +6,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import { api } from './api';
+import { api, tokenStore } from './api';
 
 export type AgeBand = 'sprouts' | 'builders' | 'investors';
 
@@ -69,6 +69,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await api.post('/auth/logout', {}).catch(() => {});
+    tokenStore.clear();
     setUser(null);
   }, []);
 

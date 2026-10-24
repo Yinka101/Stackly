@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { api, tokenStore } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
 export default function PinLogin() {
   const { learnerId } = useParams<{ learnerId: string }>();
   const nav = useNavigate();
-  const { refresh } = useSession();
+  const { user, refresh } = useSession();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Navigate only after session state is committed — same pattern as ParentLogin.
+  useEffect(() => {
+    if (user?.role === 'learner') nav('/app/home', { replace: true });
+  }, [user, nav]);
 
   const enter = async (digit: string) => {
     const next = (pin + digit).slice(0, 4);
@@ -18,13 +23,13 @@ export default function PinLogin() {
     if (next.length === 4) {
       setLoading(true);
       try {
-        await api.post('/auth/login-learner', { learnerId, pin: next });
+        const res = await api.post<{ token: string }>('/auth/login-learner', { learnerId, pin: next });
+        tokenStore.set(res.token);
         await refresh();
-        nav('/app/home');
+        // navigation handled by useEffect above
       } catch {
         setError('Wrong PIN — try again');
         setPin('');
-      } finally {
         setLoading(false);
       }
     }

@@ -1,21 +1,24 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/lib/theme';
-import App from './App';
-import './index.css';
+import './tracing'
+import './console-capture'
 
-const root = document.getElementById('root');
-if (!root) throw new Error('No #root element');
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import { Toaster } from 'sonner'
+import { ThemeProvider } from './lib/theme'
+import { SessionProvider } from './lib/session'
+import App from './App'
+import './index.css'
 
-createRoot(root).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ThemeProvider>
-        <App />
-        <Toaster richColors position="top-center" />
+        <SessionProvider>
+          <App />
+          <Toaster position="top-center" />
+        </SessionProvider>
       </ThemeProvider>
     </BrowserRouter>
-  </StrictMode>
-);
+  </StrictMode>,
+)

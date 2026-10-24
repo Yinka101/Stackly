@@ -53,7 +53,7 @@ router.post('/register-parent', async (c) => {
 
   const token = await createSession('parent', userId, familyId);
   return c.json(
-    { ok: true, role: 'parent', familyId },
+    { ok: true, role: 'parent', familyId, token },
     200,
     { 'Set-Cookie': sessionCookie(token) },
   );
@@ -72,7 +72,7 @@ router.post('/login-parent', async (c) => {
 
   const token = await createSession('parent', user.id, user.familyId);
   return c.json(
-    { ok: true, role: 'parent', familyId: user.familyId },
+    { ok: true, role: 'parent', familyId: user.familyId, token },
     200,
     { 'Set-Cookie': sessionCookie(token) },
   );
@@ -143,7 +143,7 @@ router.post('/login-learner', async (c) => {
 
   const token = await createSession('learner', learner.id, learner.familyId);
   return c.json(
-    { ok: true, role: 'learner', learnerId: learner.id, band: learner.band },
+    { ok: true, role: 'learner', learnerId: learner.id, band: learner.band, token },
     200,
     { 'Set-Cookie': sessionCookie(token) },
   );
@@ -158,11 +158,17 @@ router.get('/me', requireAuth, async (c) => {
 
 // ── POST /auth/logout ────────────────────────────────────────────────────────
 router.post('/logout', async (c) => {
-  const cookieHeader = c.req.header('cookie') ?? '';
-  const token = cookieHeader.split(';').reduce<string | null>((acc, part) => {
-    const [k, v] = part.trim().split('=');
-    return k === COOKIE_NAME ? (v ?? null) : acc;
-  }, null);
+  // Accept token from Bearer header or cookie
+  const authHeader = c.req.header('authorization') ?? '';
+  let token: string | null = authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7).trim() : null;
+  if (!token) {
+    const cookieHeader = c.req.header('cookie') ?? '';
+    token = cookieHeader.split(';').reduce<string | null>((acc, part) => {
+      const [k, v] = part.trim().split('=');
+      return k === COOKIE_NAME ? (v ?? null) : acc;
+    }, null);
+  }
   if (token) await deleteSession(token);
   return c.json({ ok: true }, 200, { 'Set-Cookie': clearCookie() });
 });

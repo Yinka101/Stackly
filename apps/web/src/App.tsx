@@ -25,6 +25,7 @@ import LearnerHome      from '@/pages/app/LearnerHome';
 import InvestPage       from '@/pages/app/InvestPage';
 import ParentFamily     from '@/pages/app/ParentFamily';
 import Placeholder      from '@/pages/app/Placeholder';
+import CoachPage        from '@/pages/app/coach/CoachPage';
 import PathMap          from '@/pages/app/learn/PathMap';
 import LessonReader     from '@/pages/app/learn/LessonReader';
 
@@ -73,7 +74,7 @@ export default function App() {
             <Route path="/app/learn/:id"     element={<LessonReader />} />
             <Route path="/app/invest"        element={<InvestPage />} />
             <Route path="/app/paypal"        element={<PayPalLabPage />} />
-            <Route path="/app/coach"         element={<Placeholder title="AI Coach"   coming="Penny the AI coach is coming next." />} />
+            <Route path="/app/coach"         element={<CoachPage />} />
           </Route>
 
           {/* Parent-only routes */}

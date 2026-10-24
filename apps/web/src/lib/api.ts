@@ -1,15 +1,27 @@
-/** Thin fetch wrapper — always sends cookies, always parses JSON. */
+/** Thin fetch wrapper — sends session token from localStorage as Bearer header. */
 const BASE = '/api';
+
+const TOKEN_KEY = 'stackly_token';
+export const tokenStore = {
+  get: () => localStorage.getItem(TOKEN_KEY),
+  set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
+  clear: () => localStorage.removeItem(TOKEN_KEY),
+};
 
 async function req<T>(
   method: string,
   path: string,
   body?: unknown,
 ): Promise<T> {
+  const token = tokenStore.get();
+  const headers: Record<string, string> = {};
+  if (body) headers['Content-Type'] = 'application/json';
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(`${BASE}${path}`, {
     method,
     credentials: 'include',
-    headers: body ? { 'Content-Type': 'application/json' } : {},
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));

@@ -23,7 +23,7 @@ app.use('*', logger());
 app.use('*', cors({
   origin: (origin) => origin ?? allowedOrigin,
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Cookie'],
+  allowHeaders: ['Content-Type', 'Cookie', 'Authorization'],
   exposeHeaders: ['Set-Cookie'],
   credentials: true,
 }));

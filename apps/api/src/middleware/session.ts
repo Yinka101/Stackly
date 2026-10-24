@@ -4,10 +4,19 @@ import { db } from '../db/index.js';
 import { users, learners } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 
-/** Reads the session cookie, validates it, attaches ctx.var.session + ctx.var.actor */
+/** Reads Bearer token (Authorization header) or session cookie, validates, attaches session + actor */
 export async function sessionMiddleware(c: Context, next: Next) {
-  const cookieHeader = c.req.header('cookie') ?? '';
-  const token = parseCookie(cookieHeader, COOKIE_NAME);
+  // Prefer Authorization: Bearer <token> (works across all proxy/preview environments)
+  const authHeader = c.req.header('authorization') ?? '';
+  let token: string | null = authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7).trim()
+    : null;
+
+  // Fall back to cookie for server-rendered or curl-style requests
+  if (!token) {
+    const cookieHeader = c.req.header('cookie') ?? '';
+    token = parseCookie(cookieHeader, COOKIE_NAME);
+  }
 
   if (!token) {
     c.set('session', null);

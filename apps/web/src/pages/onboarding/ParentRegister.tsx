@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { api, tokenStore } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
 export default function ParentRegister() {
@@ -20,12 +20,13 @@ export default function ParentRegister() {
     if (form.password.length < 8) { setError('Password must be at least 8 characters'); return; }
     setLoading(true);
     try {
-      await api.post('/auth/register-parent', {
+      const res = await api.post<{ token: string }>('/auth/register-parent', {
         familyName: form.familyName,
         email: form.email,
         password: form.password,
         consentGiven: true,
       });
+      tokenStore.set(res.token);
       await refresh();
       nav('/onboarding/add-learner');
     } catch (err) {

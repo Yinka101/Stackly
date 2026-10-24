@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { api, tokenStore } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
 const DEMO_EMAIL = 'parent@demo.stackly';
@@ -8,25 +8,32 @@ const DEMO_PASSWORD = 'demo1234';
 
 export default function ParentLogin() {
   const nav = useNavigate();
-  const { refresh } = useSession();
+  const { user, refresh } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Once session state reflects a parent, navigate — avoids the race where
+  // nav() fires before setUser() has committed inside refresh().
+  useEffect(() => {
+    if (user?.role === 'parent') nav('/app/family', { replace: true });
+    if (user?.role === 'learner') nav('/app/home', { replace: true });
+  }, [user, nav]);
+
   const doLogin = async (e?: string, p?: string) => {
     setError('');
     setLoading(true);
     try {
-      await api.post('/auth/login-parent', {
+      const res = await api.post<{ token: string }>('/auth/login-parent', {
         email: e ?? email,
         password: p ?? password,
       });
+      tokenStore.set(res.token);
+      // refresh() updates session state → useEffect above handles navigation.
       await refresh();
-      nav('/app/family');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
       setLoading(false);
     }
   };
