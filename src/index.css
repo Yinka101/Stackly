@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base tokens (Builders / neutral) ───────────────────────────────────── */
+:root {
+  --color-canvas: #fdf8f2;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f5f0ea;
+  --color-border: #e8e0d4;
+  --color-ink: #1a2744;
+  --color-ink-muted: #5a6480;
+  --color-primary: #2d9e5f;
+  --color-primary-light: #e6f7ee;
+  --color-primary-dark: #1e7044;
+  --color-accent: #f5c842;
+  --color-accent-light: #fef9e7;
+  --color-danger: #e53e3e;
+  --color-success: #2d9e5f;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --font-display: 'Baloo 2', cursive;
+  --font-body: 'Nunito', sans-serif;
+  --text-base: 18px;
+  --text-sm: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+}
+
+/* ── Sprouts — bigger, brighter ─────────────────────────────────────────── */
+[data-theme='sprouts'] {
+  --color-canvas: #fffbf0;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fff3d0;
+  --color-border: #fde68a;
+  --color-primary: #16a34a;
+  --color-primary-light: #dcfce7;
+  --color-primary-dark: #15803d;
+  --color-accent: #f59e0b;
+  --color-accent-light: #fef3c7;
+  --radius-xl: 20px;
+  --radius-2xl: 32px;
+  --text-base: 20px;
+  --text-sm: 18px;
+  --text-lg: 24px;
+  --text-xl: 30px;
+  --text-2xl: 40px;
+  --text-3xl: 52px;
+}
+
+/* ── Investors — calmer, denser ─────────────────────────────────────────── */
+[data-theme='investors'] {
+  --color-canvas: #f4f6f9;
+  --color-surface: #ffffff;
+  --color-surface-raised: #edf0f5;
+  --color-border: #d1d9e0;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
+  --color-primary: #1d6f42;
+  --color-primary-light: #d1fae5;
+  --color-primary-dark: #145c34;
+  --color-accent: #d97706;
+  --color-accent-light: #fef3c7;
+  --radius-xl: 12px;
+  --radius-2xl: 18px;
+  --text-base: 16px;
+  --text-sm: 14px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+}
+
+/* ── Global base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: var(--text-base); }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40%            { transform: translateY(-5px); }
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Reusable form input ────────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-height: 44px;
+}
+.input::placeholder { color: var(--color-ink-muted); opacity: 0.6; }
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+/* ── Safe-area bottom for iOS bottom tab bar ──────────────────────────────── */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+@keyframes pop-in {
+  0%   { transform: scale(0.85); opacity: 0; }
+  70%  { transform: scale(1.04); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+@keyframes bounce-once {
+  0%,100% { transform: translateY(0); }
+  40%      { transform: translateY(-12px); }
+}
+@keyframes xp-pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.animate-pop-in    { animation: pop-in    0.3s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.animate-bounce-once { animation: bounce-once 0.6s ease 0.3s both; }
+.animate-xp-pop    { animation: xp-pop    0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
+
+/* ── Tailwind bg/text helpers for design tokens ──────────────────────────── */
+.bg-canvas  { background-color: var(--color-canvas); }
+.bg-surface { background-color: var(--color-surface); }
+.text-ink   { color: var(--color-ink); }
+.text-primary { color: var(--color-primary); }
+.bg-primary { background-color: var(--color-primary); }
+.border-primary { border-color: var(--color-primary); }
+

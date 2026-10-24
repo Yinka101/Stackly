@@ -24,11 +24,13 @@ export default defineConfig({
       'recharts',
     ],
   },
+  // In production (Render static site), the API URL is injected via VITE_API_URL.
+  // The proxy is only active during local dev.
   server: {
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: process.env.VITE_API_URL ?? 'http://localhost:3001',
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/api/, ''),
       },
