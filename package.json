@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "bash start-server.sh",
+    "build": "vite build",
     "build:web": "vite build",
     "dev": "concurrently \"bun run dev:server\" \"bun run dev:client\"",
     "dev:client": "vite",
