@@ -16,6 +16,7 @@ async function req<T>(
   method: string,
   path: string,
   body?: unknown,
+  signal?: AbortSignal,
 ): Promise<T> {
   const token = tokenStore.get();
   const headers: Record<string, string> = {};
@@ -27,6 +28,7 @@ async function req<T>(
     credentials: 'include',
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    signal,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error((data as { error?: string }).error ?? `HTTP ${res.status}`);
@@ -34,7 +36,7 @@ async function req<T>(
 }
 
 export const api = {
-  get: <T>(path: string) => req<T>('GET', path),
+  get: <T>(path: string, signal?: AbortSignal) => req<T>('GET', path, undefined, signal),
   post: <T>(path: string, body: unknown) => req<T>('POST', path, body),
   put: <T>(path: string, body: unknown) => req<T>('PUT', path, body),
   patch: <T>(path: string, body: unknown) => req<T>('PATCH', path, body),

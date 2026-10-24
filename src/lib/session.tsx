@@ -43,10 +43,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
+      // 8 second timeout — if the API is cold-starting we still show the page
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
       const data = await api.get<{
         session: { role: 'parent' | 'learner'; familyId: string };
         actor: Record<string, unknown>;
-      }>('/auth/me');
+      }>('/auth/me', controller.signal).finally(() => clearTimeout(timeoutId));
       const actor = data.actor ?? {};
       setUser({
         role: data.session.role,
