@@ -84,6 +84,14 @@ router.post('/orders', requireParent, async (c) => {
 
   console.log('[paypal] order created id=%s kit=%s learner=%s', ppOrder.id, kit.id, body.learnerId);
 
+  // Emit SSE (no clients yet at this point, but emit anyway for any early subscribers)
+  emitOrderEvent(ppOrder.id, {
+    type: 'order_created',
+    label: '📋 Order created',
+    detail: `A ${kit.name} order for $${kit.priceUsd} is waiting for parent approval.`,
+    tech: `POST /v2/checkout/orders → id: ${ppOrder.id}`,
+  });
+
   // Return the order ID and approval link (client will redirect buyer)
   const approveLink = ppOrder.links.find(l => l.rel === 'approve')?.href ?? null;
   return c.json({ orderId: ppOrder.id, approveLink, requestId });
@@ -117,6 +125,13 @@ router.post('/orders/:id/capture', requireParent, async (c) => {
 
   console.log('[paypal] capture orderId=%s status=%s captureId=%s', orderId, captureStatus, captureId);
 
+  emitOrderEvent(orderId, {
+    type: 'capture_attempted',
+    label: '🔄 Capturing payment…',
+    detail: 'Asking PayPal to move the money now.',
+    tech: `POST /v2/checkout/orders/${orderId}/capture`,
+  });
+
   if (captureStatus === 'COMPLETED') {
     const now = new Date();
 
@@ -143,6 +158,13 @@ router.post('/orders/:id/capture', requireParent, async (c) => {
       })
       .where(eq(learners.id, order.learnerId));
 
+    emitOrderEvent(orderId, {
+      type: 'completed',
+      label: '🎉 Payment complete!',
+      detail: `${order.practiceDollarsAwarded} Practice Dollars are on their way.`,
+      tech: `capture.status = COMPLETED — captureId: ${captureId}`,
+    });
+
     console.log('[paypal] completed — awarded %d PD + %d XP to learner %s',
       order.practiceDollarsAwarded, order.xpAwarded, order.learnerId);
 
@@ -159,7 +181,101 @@ router.post('/orders/:id/capture', requireParent, async (c) => {
     .set({ status: 'failed' })
     .where(eq(paypalOrders.id, orderId));
 
+  emitOrderEvent(orderId, {
+    type: 'failed',
+    label: '❌ Payment declined',
+    detail: 'PayPal could not complete the payment. You can try again.',
+    tech: `capture.status = ${captureStatus}`,
+  });
+
   return c.json({ error: 'Capture not completed', captureStatus }, 402);
+});
+
+// ── GET /paypal/pending — parent: list pending orders for family ──────────────
+router.get('/pending', requireParent, async (c) => {
+  const session = c.get('session')!;
+
+  // Get all learners in the family
+  const familyLearners = await db
+    .select({ id: learners.id, nickname: learners.nickname })
+    .from(learners)
+    .where(eq(learners.familyId, session.familyId));
+
+  const learnerIds = familyLearners.map(l => l.id);
+  if (learnerIds.length === 0) return c.json({ orders: [] });
+
+  // Get pending orders
+  const { inArray } = await import('drizzle-orm');
+  const pending = await db
+    .select()
+    .from(paypalOrders)
+    .where(and(
+      inArray(paypalOrders.learnerId, learnerIds),
+      eq(paypalOrders.status, 'created'),
+    ));
+
+  const orders = pending.map(o => {
+    const kit = getKit(o.kitId);
+    const learner = familyLearners.find(l => l.id === o.learnerId);
+    return {
+      orderId: o.id,
+      kitId: o.kitId,
+      kitName: kit?.name ?? o.kitId,
+      amountUsd: o.amountUsd,
+      learnerNickname: learner?.nickname ?? 'Learner',
+      learnerId: o.learnerId,
+      practiceDollarsAwarded: o.practiceDollarsAwarded,
+    };
+  });
+
+  return c.json({ orders });
+});
+
+// ── GET /paypal/activity — learner: their own order history ──────────────────
+router.get('/activity', async (c) => {
+  const session = c.get('session');
+  if (!session) return c.json({ error: 'Unauthorized' }, 401);
+
+  let learnerId: string | null = null;
+  if (session.role === 'learner') {
+    learnerId = session.ownerId;
+  } else {
+    // parent: all learners in family
+  }
+
+  let orders;
+  if (learnerId) {
+    orders = await db
+      .select()
+      .from(paypalOrders)
+      .where(eq(paypalOrders.learnerId, learnerId));
+  } else {
+    // parent sees all family orders
+    const familyLearners = await db
+      .select({ id: learners.id })
+      .from(learners)
+      .where(eq(learners.familyId, session.familyId));
+    const ids = familyLearners.map(l => l.id);
+    if (ids.length === 0) return c.json({ orders: [] });
+    const { inArray } = await import('drizzle-orm');
+    orders = await db
+      .select()
+      .from(paypalOrders)
+      .where(inArray(paypalOrders.learnerId, ids));
+  }
+
+  const result = orders.map(o => ({
+    id: o.id,
+    kitId: o.kitId,
+    kitName: getKit(o.kitId)?.name ?? o.kitId,
+    amountUsd: o.amountUsd,
+    practiceDollarsAwarded: o.practiceDollarsAwarded,
+    xpAwarded: o.xpAwarded,
+    status: o.status,
+    completedAt: o.completedAt?.toISOString() ?? null,
+  }));
+
+  return c.json({ orders: result });
 });
 
 // ── GET /paypal/orders/:id — status check ────────────────────────────────────
@@ -277,4 +393,93 @@ router.post('/webhook', async (c) => {
   return c.json({ received: true });
 });
 
+// ── SSE event bus (in-process, per-order) ─────────────────────────────────────
+// Maps orderId → array of SSE writer functions
+const sseClients = new Map<string, Array<(msg: string) => void>>();
+
+export function emitOrderEvent(orderId: string, event: { type: string; label: string; detail: string; tech?: string }) {
+  const clients = sseClients.get(orderId);
+  if (!clients?.length) return;
+  const data = `data: ${JSON.stringify(event)}\n\n`;
+  clients.forEach(fn => fn(data));
+}
+
+// ── GET /paypal/orders/:id/events — SSE stream ───────────────────────────────
+router.get('/orders/:id/events', async (c) => {
+  const orderId = c.req.param('id');
+
+  return new Response(
+    new ReadableStream({
+      start(controller) {
+        const encoder = new TextEncoder();
+        const send = (msg: string) => controller.enqueue(encoder.encode(msg));
+
+        // Register client
+        if (!sseClients.has(orderId)) sseClients.set(orderId, []);
+        sseClients.get(orderId)!.push(send);
+
+        // Heartbeat every 15s to keep connection alive
+        const hb = setInterval(() => send(': heartbeat\n\n'), 15_000);
+
+        // Send initial connected event
+        send(`data: ${JSON.stringify({ type: 'connected', label: 'Connected', detail: 'Listening for payment events…' })}\n\n`);
+
+        // Cleanup on close
+        const cleanup = () => {
+          clearInterval(hb);
+          const list = sseClients.get(orderId) ?? [];
+          const idx = list.indexOf(send);
+          if (idx !== -1) list.splice(idx, 1);
+        };
+
+        c.req.raw.signal?.addEventListener('abort', cleanup);
+      },
+    }),
+    {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    }
+  );
+});
+
+// ── POST /paypal/orders/:id/approve — parent approves pending order ───────────
+// The learner initiates → parent approves → PayPal popup opens
+router.post('/orders/:id/approve', requireParent, async (c) => {
+  const session = c.get('session')!;
+  const orderId = c.req.param('id');
+
+  const [order] = await db
+    .select()
+    .from(paypalOrders)
+    .where(eq(paypalOrders.id, orderId));
+
+  if (!order) return c.json({ error: 'Order not found' }, 404);
+  if (order.parentId !== session.ownerId) return c.json({ error: 'Forbidden' }, 403);
+  if (order.status !== 'created') return c.json({ error: 'Order already processed' }, 409);
+
+  await db
+    .update(paypalOrders)
+    .set({ status: 'approved' })
+    .where(eq(paypalOrders.id, orderId));
+
+  emitOrderEvent(orderId, {
+    type: 'parent_approved',
+    label: '✅ Parent approved!',
+    detail: 'Your parent said yes. Opening PayPal checkout now…',
+    tech: 'Order status → APPROVED (internal)',
+  });
+
+  const ppOrder = await getOrder(orderId).catch(() => null);
+  const approveLink = ppOrder?.links?.find((l: { rel: string }) => l.rel === 'approve')?.href ?? null;
+
+  console.log('[paypal] parent approved orderId=%s', orderId);
+  return c.json({ approved: true, approveLink });
+});
+
+export { sseClients };
 export default router;
+

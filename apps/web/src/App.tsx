@@ -20,6 +20,7 @@ import PinLogin         from '@/pages/onboarding/PinLogin';
 import ParentLogin      from '@/pages/onboarding/ParentLogin';
 
 // App screens
+import { PayPalLabPage } from '@/pages/paypal/PayPalLabPage';
 import LearnerHome      from '@/pages/app/LearnerHome';
 import InvestPage       from '@/pages/app/InvestPage';
 import ParentFamily     from '@/pages/app/ParentFamily';
@@ -71,7 +72,7 @@ export default function App() {
             <Route path="/app/learn"         element={<PathMap />} />
             <Route path="/app/learn/:id"     element={<LessonReader />} />
             <Route path="/app/invest"        element={<InvestPage />} />
-            <Route path="/app/paypal"        element={<Placeholder title="PayPal Lab" coming="PayPal sandbox lab is coming next." />} />
+            <Route path="/app/paypal"        element={<PayPalLabPage />} />
             <Route path="/app/coach"         element={<Placeholder title="AI Coach"   coming="Penny the AI coach is coming next." />} />
           </Route>
 
