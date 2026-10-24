@@ -35,12 +35,12 @@ export default function LandingNav() {
           <a href="#faq" className="hover:text-[var(--color-primary)] transition-colors">FAQ</a>
         </nav>
 
-        <a
-          href="/onboarding"
+        <Link
+          to="/onboarding"
           className="inline-flex items-center justify-center px-5 py-2.5 rounded-[var(--radius-xl)] bg-[var(--color-primary)] text-white font-semibold text-sm min-h-[44px] hover:bg-[var(--color-primary-dark)] transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--color-primary)] focus-visible:outline-offset-2"
         >
           Start free
-        </a>
+        </Link>
       </div>
     </header>
   );

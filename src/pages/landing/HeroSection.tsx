@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Seedling from '@/assets/Seedling';
 import GrowthSlider from './GrowthSlider';
 
@@ -47,13 +48,13 @@ export default function HeroSection() {
           </p>
 
           <div className="flex flex-wrap gap-3">
-            <a
+            <Link
               id="start"
-              href="/onboarding"
+              to="/onboarding"
               className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-[var(--radius-2xl)] bg-[var(--color-primary)] text-white font-semibold text-lg min-h-[56px] hover:bg-[var(--color-primary-dark)] transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--color-primary)] focus-visible:outline-offset-2 shadow-md shadow-[var(--color-primary)]/25"
             >
               Start free
-            </a>
+            </Link>
             <a
               href="#how-it-works"
               className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-[var(--radius-2xl)] border-2 border-[var(--color-border)] text-[var(--color-ink)] font-semibold text-lg min-h-[56px] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--color-primary)] focus-visible:outline-offset-2"
