@@ -21,9 +21,10 @@ const allowedOrigin = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
 
 app.use('*', logger());
 app.use('*', cors({
-  origin: allowedOrigin,
+  origin: (origin) => origin ?? allowedOrigin,
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
+  allowHeaders: ['Content-Type', 'Cookie'],
+  exposeHeaders: ['Set-Cookie'],
   credentials: true,
 }));
 app.use('*', sessionMiddleware);

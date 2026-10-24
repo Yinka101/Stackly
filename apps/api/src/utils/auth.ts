@@ -55,11 +55,15 @@ export async function deleteSession(token: string) {
   await db.delete(sessions).where(eq(sessions.id, token));
 }
 
-/** Cookie string for Set-Cookie header */
+/** Cookie string for Set-Cookie header.
+ * We always use SameSite=Lax; Secure so the cookie works in the Arc Studio
+ * preview (HTTPS) and on Render (HTTPS). The Vite proxy forwards it fine
+ * because it runs on the same origin as the page.
+ */
 export function sessionCookie(token: string, maxAge = SESSION_TTL_MS / 1000): string {
-  return `${COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${Math.floor(maxAge)}`;
+  return `${COOKIE_NAME}=${token}; HttpOnly; SameSite=Lax; Secure; Path=/; Max-Age=${Math.floor(maxAge)}`;
 }
 
 export function clearCookie(): string {
-  return `${COOKIE_NAME}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`;
+  return `${COOKIE_NAME}=; HttpOnly; SameSite=Lax; Secure; Path=/; Max-Age=0`;
 }
