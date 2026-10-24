@@ -23,7 +23,7 @@ export default function ParentLogin() {
         password: p ?? password,
       });
       await refresh();
-      nav('/onboarding/learner-select');
+      nav('/app/family');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
