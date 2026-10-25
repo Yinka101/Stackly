@@ -12,7 +12,7 @@ import { db, chatMessages, learners, holdings, trades } from '../db/index.js';
 import { eq, desc } from 'drizzle-orm';
 import { nanoid } from '../utils/nanoid.js';
 import { buildSystemPrompt, moderateInput, moderateOutput, OFFLINE_RESPONSES, type Band } from '../ai/prompts.js';
-import { streamCompletion, complete, isConfigured } from '../ai/provider.js';
+import { streamCompletion, completeText as complete, isConfigured } from '../ai/provider.js';
 import { checkRateLimit } from '../ai/rateLimiter.js';
 import { sessionMiddleware, requireLearner } from '../middleware/session.js';
 

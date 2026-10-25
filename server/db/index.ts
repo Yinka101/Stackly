@@ -9,3 +9,5 @@ sqlite.exec('PRAGMA journal_mode = WAL;');
 
 export const db = drizzle(sqlite, { schema });
 export * from './schema.js';
+// Re-export new agent tables (defined in schema.ts)
+export { agentPlans, agentAuditLog, familySettings } from './schema.js';

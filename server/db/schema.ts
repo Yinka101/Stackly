@@ -119,3 +119,40 @@ export const lessonProgress = sqliteTable('lesson_progress', {
   completedAt: integer('completed_at', { mode: 'timestamp_ms' }).notNull(),
   xpEarned: integer('xp_earned').notNull().default(0),
 });
+
+// ── Agentic commerce: Coach plans ────────────────────────────────────────────
+// Each row = one agent run triggered by a learner message
+export const agentPlans = sqliteTable('agent_plans', {
+  id: text('id').primaryKey(),
+  learnerId: text('learner_id').notNull().references(() => learners.id),
+  familyId: text('family_id').notNull(),
+  userMessage: text('user_message').notNull(),           // original learner input
+  status: text('status').notNull().default('thinking'),  // thinking|proposed|approved|declined|completed|failed
+  kitId: text('kit_id'),                                 // chosen kit (if any)
+  orderId: text('order_id'),                             // paypalOrders.id after creation
+  planSteps: text('plan_steps').notNull().default('[]'), // JSON array of PlanStep
+  reasoning: text('reasoning'),                          // agent's plain-language explanation
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+});
+
+// ── Agentic commerce: Audit log ───────────────────────────────────────────────
+// Every tool call the agent makes, immutable append-only
+export const agentAuditLog = sqliteTable('agent_audit_log', {
+  id: text('id').primaryKey(),
+  planId: text('plan_id').notNull().references(() => agentPlans.id),
+  learnerId: text('learner_id').notNull(),
+  tool: text('tool').notNull(),                          // tool name
+  input: text('input').notNull().default('{}'),          // JSON, no personal data
+  output: text('output').notNull().default('{}'),        // JSON, no personal data
+  durationMs: integer('duration_ms'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+});
+
+// ── Family settings (parent controls) ────────────────────────────────────────
+export const familySettings = sqliteTable('family_settings', {
+  familyId: text('family_id').primaryKey().references(() => families.id),
+  agentEnabled: integer('agent_enabled', { mode: 'boolean' }).notNull().default(true),
+  weeklyCapCents: integer('weekly_cap_cents').notNull().default(1000), // $10.00 default
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
+});

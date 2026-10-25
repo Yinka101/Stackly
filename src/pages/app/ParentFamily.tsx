@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
+import AgentSettings from './AgentSettings';
 
 interface LearnerRow { id: string; nickname: string; band: string; avatar: string; xp: number; streakDays: number; practiceDollars: number; }
 const AVATAR_EMOJI: Record<string, string> = { owl:'🦉',fox:'🦊',bear:'🐻',panda:'🐼',butterfly:'🦋',turtle:'🐢',lion:'🦁',frog:'🐸',rocket:'🚀',star:'⭐',seedling:'🌱',chart:'📈' };
@@ -23,7 +24,7 @@ export default function ParentFamily() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 mb-8">
         {learners.map((l) => (
           <div key={l.id} className="bg-surface border border-ink/8 rounded-2xl px-4 py-4 flex items-center gap-4">
             <span className="text-3xl">{AVATAR_EMOJI[l.avatar] ?? '🌱'}</span>
@@ -35,6 +36,8 @@ export default function ParentFamily() {
           </div>
         ))}
       </div>
+
+      <AgentSettings />
     </div>
   );
 }

@@ -110,33 +110,62 @@ export async function* streamCompletion(
 
 /**
  * Non-streaming completion for structured outputs (quiz, review).
+ * Also used by the agent loop — accepts optional tools for function calling.
  */
-export async function complete(messages: ChatMessage[]): Promise<string> {
+export async function complete(
+  messages: unknown[],
+  tools?: unknown[],
+): Promise<AgentResponse> {
   const cfg = getConfig();
-  if (!cfg) return OFFLINE_FALLBACK;
+  if (!cfg) return { choices: [{ finish_reason: 'stop', message: { content: OFFLINE_FALLBACK, tool_calls: [] } }] };
 
   try {
+    const body: Record<string, unknown> = {
+      model: cfg.model,
+      messages,
+      max_tokens: tools ? 1000 : cfg.maxTokens,
+      temperature: cfg.temperature,
+      stream: false,
+    };
+    if (tools?.length) {
+      body.tools = tools;
+      body.tool_choice = 'auto';
+    }
     const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${cfg.apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: cfg.model,
-        messages,
-        max_tokens: cfg.maxTokens,
-        temperature: cfg.temperature,
-        stream: false,
-      }),
+      body: JSON.stringify(body),
     });
-    if (!res.ok) return OFFLINE_FALLBACK;
-    type OAI = { choices: { message: { content: string } }[] };
-    const data = (await res.json()) as OAI;
-    return data.choices[0]?.message?.content ?? OFFLINE_FALLBACK;
+    if (!res.ok) {
+      return { choices: [{ finish_reason: 'stop', message: { content: OFFLINE_FALLBACK, tool_calls: [] } }] };
+    }
+    return (await res.json()) as AgentResponse;
   } catch {
-    return OFFLINE_FALLBACK;
+    return { choices: [{ finish_reason: 'stop', message: { content: OFFLINE_FALLBACK, tool_calls: [] } }] };
   }
+}
+
+/** Typed response shape for both plain completions and function-calling */
+export interface AgentResponse {
+  choices: Array<{
+    finish_reason: string;
+    message: {
+      content: string | null;
+      tool_calls?: Array<{
+        id: string;
+        function: { name: string; arguments: string };
+      }>;
+    };
+  }>;
+}
+
+/** Legacy helper for plain-text completions (quiz, review, explain) */
+export async function completeText(messages: ChatMessage[]): Promise<string> {
+  const result = await complete(messages);
+  return result.choices[0]?.message?.content ?? OFFLINE_FALLBACK;
 }
 
 export function isConfigured(): boolean {

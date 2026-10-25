@@ -5,7 +5,9 @@ import { useCoach } from './useCoach';
 import QuizCard from './QuizCard';
 import PortfolioReview from './PortfolioReview';
 
-type Tab = 'chat' | 'quiz' | 'review';
+import AgentCoach from './AgentCoach';
+
+type Tab = 'chat' | 'quiz' | 'review' | 'agent';
 
 const STARTERS: Record<string, string[]> = {
   sprouts: [
@@ -69,17 +71,17 @@ export default function CoachPage() {
 
         {/* Tabs */}
         <div className="flex bg-ink/6 rounded-xl p-1 gap-1">
-          {(['chat', 'quiz', 'review'] as Tab[]).map((tab) => (
+          {(['chat', 'agent', 'quiz', 'review'] as Tab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold capitalize transition-all min-h-[36px] ${
+              className={`flex-1 py-2 rounded-lg text-xs font-semibold capitalize transition-all min-h-[36px] ${
                 activeTab === tab
                   ? 'bg-white text-ink shadow-sm'
                   : 'text-ink/50 hover:text-ink'
               }`}
             >
-              {tab === 'chat' ? '💬 Chat' : tab === 'quiz' ? '🎯 Quiz' : '📊 Review'}
+              {tab === 'chat' ? '💬 Chat' : tab === 'agent' ? '✨ Agent' : tab === 'quiz' ? '🎯 Quiz' : '📊 Review'}
             </button>
           ))}
         </div>
@@ -168,6 +170,12 @@ export default function CoachPage() {
               </svg>
             </button>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'agent' && (
+        <div className="flex-1 overflow-y-auto">
+          <AgentCoach />
         </div>
       )}
 

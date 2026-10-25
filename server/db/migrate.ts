@@ -119,6 +119,38 @@ sqlite.exec(`
     completed_at INTEGER NOT NULL,
     xp_earned INTEGER NOT NULL DEFAULT 0
   );
+
+  CREATE TABLE IF NOT EXISTS agent_plans (
+    id TEXT PRIMARY KEY,
+    learner_id TEXT NOT NULL REFERENCES learners(id),
+    family_id TEXT NOT NULL,
+    user_message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'thinking',
+    kit_id TEXT,
+    order_id TEXT,
+    plan_steps TEXT NOT NULL DEFAULT '[]',
+    reasoning TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS agent_audit_log (
+    id TEXT PRIMARY KEY,
+    plan_id TEXT NOT NULL REFERENCES agent_plans(id),
+    learner_id TEXT NOT NULL,
+    tool TEXT NOT NULL,
+    input TEXT NOT NULL DEFAULT '{}',
+    output TEXT NOT NULL DEFAULT '{}',
+    duration_ms INTEGER,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS family_settings (
+    family_id TEXT PRIMARY KEY REFERENCES families(id),
+    agent_enabled INTEGER NOT NULL DEFAULT 1,
+    weekly_cap_cents INTEGER NOT NULL DEFAULT 1000,
+    updated_at INTEGER NOT NULL
+  );
 `);
 
 // ── Seed demo family ─────────────────────────────────────────────────────────
