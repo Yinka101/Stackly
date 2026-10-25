@@ -20,6 +20,7 @@ import paypalRouter from './routes/paypal.js';
 import aiRouter from './routes/ai.js';
 import investRouter from './routes/invest.js';
 import agentRouter from './routes/agent.js';
+import familyRouter from './routes/family.js';
 import { sessionMiddleware } from './middleware/session.js';
 
 const app = new Hono();
@@ -54,6 +55,7 @@ app.route('/paypal', paypalRouter);
 app.route('/ai', aiRouter);
 app.route('/invest', investRouter);
 app.route('/agent', agentRouter);
+app.route('/family', familyRouter);
 
 app.notFound((c) => c.json({ error: 'not found' }, 404));
 app.onError((err, c) => {

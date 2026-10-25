@@ -201,5 +201,10 @@ sqlite.exec(`
   console.log('[db]   Sprout Sam PIN 1111 | Builder Ben PIN 2222 | Investor Ivy PIN 3333');
 }
 
+// ── Idempotent column additions (ALTER TABLE IF NOT EXISTS not supported by SQLite;
+//    catch the "duplicate column" error instead) ─────────────────────────────
+const addCol = (sql: string) => { try { sqlite.exec(sql); } catch { /* already exists */ } };
+addCol(`ALTER TABLE family_settings ADD COLUMN reading_level_override TEXT`);
+
 console.log('[db] Tables ready at', dbPath);
 sqlite.close();

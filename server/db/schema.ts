@@ -154,5 +154,7 @@ export const familySettings = sqliteTable('family_settings', {
   familyId: text('family_id').primaryKey().references(() => families.id),
   agentEnabled: integer('agent_enabled', { mode: 'boolean' }).notNull().default(true),
   weeklyCapCents: integer('weekly_cap_cents').notNull().default(1000), // $10.00 default
+  // null = follow the learner's age band; 'sprouts'|'builders'|'investors' = override per-family
+  readingLevelOverride: text('reading_level_override'),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
 });
