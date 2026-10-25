@@ -31,7 +31,7 @@ export default function HowItWorksSection() {
       id="how-it-works"
       ref={(el) => {
         sectionRef.current = el;
-        (ref as React.MutableRefObject<HTMLElement | null>).current = el;
+        (ref).current = el;
       }}
       className="py-20 px-4 sm:px-6 bg-[var(--color-surface-raised)]"
       aria-labelledby="hiw-heading"

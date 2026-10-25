@@ -193,7 +193,7 @@ export default function CoachPage() {
                          text-sm text-ink placeholder:text-ink/30 focus:outline-none
                          focus:border-primary focus-visible:ring-2 focus-visible:ring-primary
                          disabled:opacity-50 min-h-[48px] max-h-[120px] transition-colors"
-              style={{ fieldSizing: 'content' } as React.CSSProperties}
+              style={{ fieldSizing: 'content' }}
             />
             <button
               onClick={send}

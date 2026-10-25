@@ -177,7 +177,7 @@ sqlite.exec(`
     `INSERT OR IGNORE INTO users
        (id, family_id, email, password_hash, consent_given, consent_at, created_at)
      VALUES (?, ?, ?, ?, 1, ?, ?)`,
-    [PARENT_ID, FAMILY_ID, 'parent@demo.stackly', hash('demo1234'), now, now],
+    [PARENT_ID, FAMILY_ID, 'demo@stackly.app', hash('demo1234'), now, now],
   );
 
   const seedLearners = [
@@ -197,7 +197,11 @@ sqlite.exec(`
     );
   }
 
-  console.log('[db] Demo family ready — parent@demo.stackly / demo1234');
+  // Fix any existing DB that still has the old email
+  sqlite.run(`UPDATE users SET email = 'demo@stackly.app' WHERE id = ? AND email = 'parent@demo.stackly'`,
+    [PARENT_ID]);
+
+  console.log('[db] Demo family ready — demo@stackly.app / demo1234');
   console.log('[db]   Sprout Sam PIN 1111 | Builder Ben PIN 2222 | Investor Ivy PIN 3333');
 }
 

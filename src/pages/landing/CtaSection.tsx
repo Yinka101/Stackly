@@ -11,7 +11,7 @@ export default function CtaSection() {
     <section
       ref={(el) => {
         sectionRef.current = el;
-        (ref as React.MutableRefObject<HTMLElement | null>).current = el;
+        (ref).current = el;
       }}
       className="py-24 px-4 sm:px-6 bg-[var(--color-surface-raised)]"
       aria-labelledby="cta-heading"

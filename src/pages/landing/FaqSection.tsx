@@ -80,7 +80,7 @@ export default function FaqSection() {
       id="faq"
       ref={(el) => {
         sectionRef.current = el;
-        (ref as React.MutableRefObject<HTMLElement | null>).current = el;
+        (ref).current = el;
       }}
       className="py-20 px-4 sm:px-6"
       aria-labelledby="faq-heading"

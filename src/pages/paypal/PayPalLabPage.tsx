@@ -74,7 +74,7 @@ export function PayPalLabPage() {
   const [active, setActive] = useState<ActiveMission>(null);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
 
-  const band = (user?.band ?? 'builders') as AgeBand;
+  const band = (user?.band ?? 'builders');
   const learnerId = user?.id ?? '';
   const familyId = user?.familyId ?? '';
   const isParent = user?.role === 'parent';

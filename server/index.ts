@@ -22,19 +22,16 @@ import investRouter from './routes/invest.js';
 import agentRouter from './routes/agent.js';
 import familyRouter from './routes/family.js';
 import { sessionMiddleware } from './middleware/session.js';
-import { secureHeaders } from './middleware/secureHeaders.js';
-import { apiLimit } from './middleware/rateLimit.js';
 
 const app = new Hono();
 
-// ── CORS ──────────────────────────────────────────────────────────────────────
+// Accept any origin in dev; restrict in production via CORS_ORIGIN env var
 const rawOrigin = process.env.CORS_ORIGIN;
 const allowedOrigins = rawOrigin
   ? rawOrigin.split(',').map(o => o.trim())
   : null; // null = allow all (dev mode)
 
 app.use('*', logger());
-
 app.use('*', cors({
   origin: (origin) => {
     if (!allowedOrigins) return origin ?? '*';
@@ -46,25 +43,10 @@ app.use('*', cors({
   exposeHeaders: ['Set-Cookie'],
   credentials: true,
 }));
-
-// ── Security headers on every response ────────────────────────────────────────
-app.use('*', secureHeaders);
-
-// ── Global rate limit (generous — per-route limits are tighter where needed) ──
-app.use('*', apiLimit);
-
-// ── Session ───────────────────────────────────────────────────────────────────
 app.use('*', sessionMiddleware);
 
-// ── Health ────────────────────────────────────────────────────────────────────
-app.get('/health', (c) => c.json({
-  ok: true,
-  ts: Date.now(),
-  env: process.env.NODE_ENV ?? 'development',
-  version: process.env.npm_package_version ?? '0.0.0',
-}));
+app.get('/health', (c) => c.json({ ok: true, ts: Date.now(), env: process.env.NODE_ENV }));
 
-// ── Routes ────────────────────────────────────────────────────────────────────
 app.route('/auth', authRouter);
 app.route('/profiles', profilesRouter);
 app.route('/lessons', lessonsRouter);
@@ -75,7 +57,6 @@ app.route('/invest', investRouter);
 app.route('/agent', agentRouter);
 app.route('/family', familyRouter);
 
-// ── Error handlers ────────────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: 'not found' }, 404));
 app.onError((err, c) => {
   console.error('[server] unhandled error:', err.message);
