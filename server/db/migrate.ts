@@ -3,7 +3,7 @@
  * if none exist yet. Uses raw SQL via bun:sqlite.
  */
 import { Database } from 'bun:sqlite';
-import { randomBytes, createHash } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 const dbPath = process.env.DATABASE_URL ?? './stackly.db';
 const sqlite = new Database(dbPath, { create: true });
@@ -153,54 +153,51 @@ sqlite.exec(`
   );
 `);
 
-// ── Seed demo family ─────────────────────────────────────────────────────────
-const existing = sqlite.query('SELECT COUNT(*) as n FROM families').get() as { n: number };
-
-if (existing.n === 0) {
-  const nano = () => randomBytes(10).toString('hex');
-  // Simple deterministic hash — good enough for demo PINs (not production)
-  const hashPin = (pin: string) =>
-    createHash('sha256').update(`stackly:${pin}`).digest('hex');
-
-  const familyId = nano();
-  const parentId = nano();
+// ── Seed demo family (idempotent — runs on every startup) ────────────────────
+// Uses INSERT OR IGNORE with stable hard-coded IDs so a fresh DB after a
+// Render redeploy always has the demo account, but an existing DB is untouched.
+{
+  const hash = (v: string) => createHash('sha256').update(`stackly:${v}`).digest('hex');
   const now = Date.now();
+  const today = new Date().toISOString().slice(0, 10);
 
-  // Parent password: sha256 of "demo1234" (prototype — not production bcrypt)
-  const pwHash = createHash('sha256').update('stackly:demo1234').digest('hex');
+  // Stable IDs — never change these or existing sessions break
+  const FAMILY_ID  = 'demo-family-0001';
+  const PARENT_ID  = 'demo-parent-0001';
+  const SAM_ID     = 'demo-learner-sam';
+  const BEN_ID     = 'demo-learner-ben';
+  const IVY_ID     = 'demo-learner-ivy';
 
   sqlite.run(
-    'INSERT INTO families (id, name, created_at) VALUES (?, ?, ?)',
-    [familyId, 'Demo Family', now],
+    'INSERT OR IGNORE INTO families (id, name, created_at) VALUES (?, ?, ?)',
+    [FAMILY_ID, 'Demo Family', now],
   );
 
   sqlite.run(
-    `INSERT INTO users (id, family_id, email, password_hash, consent_given, consent_at, created_at)
+    `INSERT OR IGNORE INTO users
+       (id, family_id, email, password_hash, consent_given, consent_at, created_at)
      VALUES (?, ?, ?, ?, 1, ?, ?)`,
-    [parentId, familyId, 'parent@demo.stackly', pwHash, now, now],
+    [PARENT_ID, FAMILY_ID, 'parent@demo.stackly', hash('demo1234'), now, now],
   );
 
   const seedLearners = [
-    { nickname: 'Sprout Sam', band: 'sprouts',   avatar: 'seedling', pin: '1111', xp: 120, streak: 3, pd: 950 },
-    { nickname: 'Builder Ben', band: 'builders',  avatar: 'rocket',   pin: '2222', xp: 340, streak: 7, pd: 1250 },
-    { nickname: 'Investor Ivy', band: 'investors', avatar: 'chart',    pin: '3333', xp: 780, streak: 14, pd: 2100 },
+    { id: SAM_ID, nickname: 'Sprout Sam',   band: 'sprouts',   avatar: 'seedling', pin: '1111', xp: 120,  streak: 3,  pd: 950  },
+    { id: BEN_ID, nickname: 'Builder Ben',  band: 'builders',  avatar: 'rocket',   pin: '2222', xp: 340,  streak: 7,  pd: 1250 },
+    { id: IVY_ID, nickname: 'Investor Ivy', band: 'investors', avatar: 'chart',    pin: '3333', xp: 780,  streak: 14, pd: 2100 },
   ];
 
   for (const l of seedLearners) {
     sqlite.run(
-      `INSERT INTO learners
+      `INSERT OR IGNORE INTO learners
          (id, family_id, nickname, band, avatar, pin_hash,
           practice_dollars, xp, streak_days, last_active_date, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        nano(), familyId, l.nickname, l.band, l.avatar,
-        hashPin(l.pin), l.pd, l.xp, l.streak,
-        new Date().toISOString().slice(0, 10), now,
-      ],
+      [l.id, FAMILY_ID, l.nickname, l.band, l.avatar,
+       hash(l.pin), l.pd, l.xp, l.streak, today, now],
     );
   }
 
-  console.log('[db] Demo family seeded — parent@demo.stackly / demo1234');
+  console.log('[db] Demo family ready — parent@demo.stackly / demo1234');
   console.log('[db]   Sprout Sam PIN 1111 | Builder Ben PIN 2222 | Investor Ivy PIN 3333');
 }
 
