@@ -5,7 +5,7 @@ import { useSession } from '@/lib/session';
 
 export default function ParentRegister() {
   const nav = useNavigate();
-  const { refresh } = useSession();
+  const { setUserFromLogin } = useSession();
   const [form, setForm] = useState({ familyName: '', email: '', password: '', confirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,14 +20,12 @@ export default function ParentRegister() {
     if (form.password.length < 8) { setError('Password must be at least 8 characters'); return; }
     setLoading(true);
     try {
-      const res = await api.post<{ token: string }>('/auth/register-parent', {
-        familyName: form.familyName,
-        email: form.email,
-        password: form.password,
-        consentGiven: true,
-      });
+      const res = await api.post<{ token: string; role: 'parent' | 'learner'; familyId: string }>(
+        '/auth/register-parent',
+        { familyName: form.familyName, email: form.email, password: form.password, consentGiven: true },
+      );
       tokenStore.set(res.token);
-      await refresh();
+      setUserFromLogin({ role: res.role ?? 'parent', familyId: res.familyId, token: res.token });
       nav('/onboarding/add-learner');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');

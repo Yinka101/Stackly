@@ -3,7 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { tokenStore } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
-const DEMO_EMAIL    = 'parent@demo.stackly';
+// Shape returned by POST /auth/login-parent
+interface LoginResponse {
+  ok: boolean;
+  role: 'parent' | 'learner';
+  familyId: string;
+  token: string;
+}
+
+const DEMO_EMAIL    = 'demo@stackly.app';
 const DEMO_PASSWORD = 'demo1234';
 
 // Resolved once at module load — baked into the bundle by Vite.
@@ -12,13 +20,13 @@ const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/
 
 export default function ParentLogin() {
   const nav = useNavigate();
-  const { user, refresh } = useSession();
+  const { user, setUserFromLogin } = useSession();
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [error,    setError]    = useState('');
   const [loading,  setLoading]  = useState(false);
 
-  // Navigate as soon as the session context reflects a logged-in user.
+  // If already logged in, skip this page.
   useEffect(() => {
     if (user?.role === 'parent')  nav('/app/family', { replace: true });
     if (user?.role === 'learner') nav('/app/home',   { replace: true });
@@ -46,13 +54,15 @@ export default function ParentLogin() {
         throw new Error(data.error ?? `Error ${res.status}`);
       }
 
-      const data = await res.json() as { token: string };
+      const data = await res.json() as LoginResponse;
+      // Store token then update session context directly — no second network
+      // call needed (avoids timeout race that would clear the token again).
       tokenStore.set(data.token);
-      await refresh();
-      // navigation happens in the useEffect above once `user` is set
+      setUserFromLogin({ role: data.role, familyId: data.familyId, token: data.token });
+      // useEffect above will navigate once user state updates
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
-        setError('The server is still waking up. Wait 30 seconds and try again.');
+        setError('The server is still waking up — wait 30 s and try again.');
       } else {
         setError(err instanceof Error ? err.message : 'Something went wrong');
       }

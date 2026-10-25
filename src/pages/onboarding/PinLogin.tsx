@@ -6,7 +6,7 @@ import { useSession } from '@/lib/session';
 export default function PinLogin() {
   const { learnerId } = useParams<{ learnerId: string }>();
   const nav = useNavigate();
-  const { user, refresh } = useSession();
+  const { user, setUserFromLogin } = useSession();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,9 +23,11 @@ export default function PinLogin() {
     if (next.length === 4) {
       setLoading(true);
       try {
-        const res = await api.post<{ token: string }>('/auth/login-learner', { learnerId, pin: next });
+        const res = await api.post<{ token: string; role: 'learner'; familyId: string }>(
+          '/auth/login-learner', { learnerId, pin: next },
+        );
         tokenStore.set(res.token);
-        await refresh();
+        setUserFromLogin({ role: 'learner', familyId: res.familyId, token: res.token });
         // navigation handled by useEffect above
       } catch {
         setError('Wrong PIN — try again');
