@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, tokenStore } from '@/lib/api';
+import { tokenStore } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
 const DEMO_EMAIL = 'parent@demo.stackly';
@@ -24,16 +24,33 @@ export default function ParentLogin() {
   const doLogin = async (e?: string, p?: string) => {
     setError('');
     setLoading(true);
+    // 15s timeout — shows a clear message if the API is cold-starting
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
     try {
-      const res = await api.post<{ token: string }>('/auth/login-parent', {
-        email: e ?? email,
-        password: p ?? password,
-      });
-      tokenStore.set(res.token);
-      // refresh() updates session state → useEffect above handles navigation.
+      const res = await fetch(
+        (import.meta.env.VITE_API_URL ?? '') + '/auth/login-parent',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: e ?? email, password: p ?? password }),
+          signal: controller.signal,
+        }
+      ).finally(() => clearTimeout(timer));
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(data.error ?? `Error ${res.status}`);
+      }
+      const data = await res.json() as { token: string };
+      tokenStore.set(data.token);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setError('The server is waking up — please try again in 30 seconds.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Something went wrong');
+      }
       setLoading(false);
     }
   };

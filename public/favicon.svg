@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Pot -->
+  <path d="M20 44 h24 l-3 12 H23 Z" fill="#c8845a"/>
+  <rect x="18" y="40" width="28" height="5" rx="2" fill="#b5714a"/>
+  <!-- Soil -->
+  <ellipse cx="32" cy="40" rx="12" ry="3" fill="#7a5230"/>
+  <!-- Stem -->
+  <line x1="32" y1="40" x2="32" y2="22" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Left leaf -->
+  <path d="M32 30 Q20 24 22 14 Q30 20 32 30Z" fill="#66bb6a"/>
+  <!-- Right leaf -->
+  <path d="M32 26 Q44 20 42 10 Q34 16 32 26Z" fill="#43a047"/>
+  <!-- Shine on pot -->
+  <path d="M24 43 Q26 41 28 43" stroke="#e8a070" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+</svg>

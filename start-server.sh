@@ -1,16 +1,25 @@
 #!/bin/bash
-# Render-compatible start script for the Hono + Bun server.
-# The build step installs Bun, but its PATH is lost between build and start.
-# This script re-installs Bun if it's missing, then runs the server.
-
-set -e
+# Render-compatible start script for Hono + Bun.
+# Installs Bun if missing (PATH is lost between build and start on Render).
 
 BUN_BIN="$HOME/.bun/bin/bun"
 
 if [ ! -f "$BUN_BIN" ]; then
-  echo "[start] Bun not found — installing..."
-  curl -fsSL https://bun.sh/install | bash
+  echo "[start] Installing Bun..."
+  curl -fsSL https://bun.sh/install | bash || true
 fi
 
-echo "[start] Using Bun: $($BUN_BIN --version)"
+if [ ! -f "$BUN_BIN" ]; then
+  echo "[start] Bun install failed, trying npm fallback..."
+  npm install -g bun 2>/dev/null || true
+  BUN_BIN=$(which bun 2>/dev/null || echo "$HOME/.bun/bin/bun")
+fi
+
+echo "[start] Bun path: $BUN_BIN"
+"$BUN_BIN" --version
+
+# Use absolute path for SQLite DB so it persists in the right location
+export DATABASE_URL="${DATABASE_URL:-/opt/render/project/src/stackly.db}"
+
+echo "[start] DB path: $DATABASE_URL"
 exec "$BUN_BIN" server/index.ts
