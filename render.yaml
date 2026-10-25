@@ -26,6 +26,8 @@ services:
         sync: false
       - key: SESSION_SECRET
         generateValue: true
+      - key: DEMO_MODE
+        value: "true"
 
   # ── Web (Vite static) ─────────────────────────────────────────────────────
   - type: web
@@ -36,6 +38,8 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://stackly-api.onrender.com
+      - key: VITE_DEMO_MODE
+        value: "true"
     routes:
       - type: rewrite
         source: /*

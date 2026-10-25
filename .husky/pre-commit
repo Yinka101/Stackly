@@ -1,0 +1,22 @@
+#!/bin/sh
+# Pre-commit secret scanner
+# Blocks commits containing patterns that look like real credentials.
+# Add false-positive exemptions to .gitignore or a .gitleaksignore file.
+
+set -e
+
+STAGED=$(git diff --cached --name-only 2>/dev/null || true)
+if [ -z "$STAGED" ]; then exit 0; fi
+
+# Patterns to block
+PATTERNS='sk-[a-zA-Z0-9]{32,}|AKIA[A-Z0-9]{16}|ghp_[a-zA-Z0-9]{36}|-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY|paypalclientsecret[^\s]*=[^\s]{12,}'
+
+echo "$STAGED" | tr '\n' '\0' | xargs -0 grep -rn -iE "$PATTERNS" -- 2>/dev/null && {
+  echo ""
+  echo "❌  Secret detected in staged files — commit blocked."
+  echo "    Remove the secret, then run: git add <file> && git commit"
+  echo ""
+  exit 1
+}
+
+echo "✅  No secrets found in staged files."

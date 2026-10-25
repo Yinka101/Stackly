@@ -8,3 +8,7 @@ dist
 .DS_Store
 coverage
 apps/api/src/data/market/prices.json
+# Playwright
+playwright-report/
+test-results/
+.playwright/

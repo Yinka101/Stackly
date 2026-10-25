@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSession } from '@/lib/session';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { DemoDrawer } from '@/components/DemoDrawer';
 
 // Guards
 import { RequireAuth, RequireParent, RequireLearner, RedirectIfAuthed } from '@/components/RouteGuard';
@@ -40,6 +42,8 @@ function AppRedirect() {
 
 export default function App() {
   return (
+    <ErrorBoundary>
+      <DemoDrawer />
     <Routes>
       {/* Public */}
       <Route path="/" element={<Landing />} />
@@ -87,5 +91,6 @@ export default function App() {
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </ErrorBoundary>
   );
 }
