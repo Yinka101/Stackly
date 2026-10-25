@@ -63,6 +63,7 @@ app.onError((err, c) => {
   return c.json({ error: 'internal server error' }, 500);
 });
 
+// Render sets PORT dynamically — never hardcode it in production
 const port = Number(process.env.PORT ?? 3001);
 console.log(`[server] Hono listening on :${port}`);
-serve({ fetch: app.fetch, port });
+serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
