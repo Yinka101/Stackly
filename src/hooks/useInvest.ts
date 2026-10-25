@@ -68,13 +68,15 @@ export function usePortfolio() {
 export function useTickers() {
   const [tickers, setTickers] = useState<{ ticker: string; name: string; lastClose: number }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(false);
 
   useEffect(() => {
     apiFetch<{ tickers: typeof tickers }>('/tickers')
-      .then(d => setTickers(d.tickers))
+      .then(d => { setTickers(d.tickers); setError(false); })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
-  return { tickers, loading };
+  return { tickers, loading, error };
 }
 
 export function useTickerBars(ticker: string | null) {
