@@ -60,7 +60,7 @@ export default function FamilyPrivacy() {
   const deleteLearner = async (learnerId: string) => {
     setDeleting(learnerId);
     try {
-      await api.del(`/family/learners/${learnerId}`);
+      await api.delete(`/family/learners/${learnerId}`);
       setLearnersList((prev) => prev.filter((l) => l.id !== learnerId));
       setConfirmId(null);
       showToast('Learner and all data permanently deleted.');

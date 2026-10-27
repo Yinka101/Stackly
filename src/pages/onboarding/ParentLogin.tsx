@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { tokenStore } from '@/lib/api';
+import { tokenStore, getApiBase } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
 // Shape returned by POST /auth/login-parent
@@ -13,10 +13,6 @@ interface LoginResponse {
 
 const DEMO_EMAIL    = 'demo@stackly.app';
 const DEMO_PASSWORD = 'demo1234';
-
-// Resolved once at module load — baked into the bundle by Vite.
-// Falls back to /api (the Vite dev-proxy) when the env var is absent.
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? '/api';
 
 export default function ParentLogin() {
   const nav = useNavigate();
@@ -41,7 +37,7 @@ export default function ParentLogin() {
     const timer = setTimeout(() => controller.abort(), 30_000);
 
     try {
-      const url = `${API_BASE}/auth/login-parent`;
+      const url = `${getApiBase()}/auth/login-parent`;
       const res = await fetch(url, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
