@@ -41,7 +41,7 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        value: https://stackly-api.onrender.com
+        value: https://stackly-a1ke.onrender.com
       - key: VITE_DEMO_MODE
         value: "true"
     routes:
