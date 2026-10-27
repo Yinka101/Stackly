@@ -3,8 +3,11 @@ services:
   - type: web
     name: stackly-api
     runtime: node
-    buildCommand: "curl -fsSL https://bun.sh/install | bash && $HOME/.bun/bin/bun install"
-    startCommand: "export PATH=$HOME/.bun/bin:$PATH && export DATABASE_URL=${DATABASE_URL:-/opt/render/project/src/stackly.db} && bun server/index.ts"
+    buildCommand: >
+      curl -fsSL https://bun.sh/install | bash &&
+      $HOME/.bun/bin/bun install &&
+      echo "BUN_PATH=$HOME/.bun/bin/bun" >> $RENDER_BUILD_VARS 2>/dev/null || true
+    startCommand: "$HOME/.bun/bin/bun server/index.ts"
     envVars:
       - key: NODE_ENV
         value: production
@@ -31,7 +34,10 @@ services:
   - type: web
     name: stackly-web
     runtime: static
-    buildCommand: "curl -fsSL https://bun.sh/install | bash && $HOME/.bun/bin/bun install && $HOME/.bun/bin/bunx vite build"
+    buildCommand: >
+      curl -fsSL https://bun.sh/install | bash &&
+      $HOME/.bun/bin/bun install &&
+      $HOME/.bun/bin/bunx vite build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
