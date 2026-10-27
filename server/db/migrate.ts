@@ -205,10 +205,39 @@ sqlite.exec(`
   console.log('[db]   Sprout Sam PIN 1111 | Builder Ben PIN 2222 | Investor Ivy PIN 3333');
 }
 
-// ── Idempotent column additions (ALTER TABLE IF NOT EXISTS not supported by SQLite;
-//    catch the "duplicate column" error instead) ─────────────────────────────
+// ── Idempotent column additions / renames ────────────────────────────────────
+// SQLite doesn't support ALTER TABLE RENAME COLUMN in older versions.
+// Pattern: add the new column, copy data, leave old column in place (harmless).
 const addCol = (sql: string) => { try { sqlite.exec(sql); } catch { /* already exists */ } };
+
+// Schema migration: profile_id -> learner_id across holdings, trades, and related tables
+// Add learner_id if missing, then backfill from profile_id
+const renameCols: Array<{ table: string; from: string; to: string }> = [
+  { table: 'holdings',        from: 'profile_id', to: 'learner_id' },
+  { table: 'trades',          from: 'profile_id', to: 'learner_id' },
+  { table: 'replay_sessions', from: 'profile_id', to: 'learner_id' },
+  { table: 'lesson_progress', from: 'profile_id', to: 'learner_id' },
+  { table: 'chat_messages',   from: 'profile_id', to: 'learner_id' },
+];
+
+for (const { table, from, to } of renameCols) {
+  // Check if old column exists
+  const cols = sqlite.query(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  const hasOld = cols.some(c => c.name === from);
+  const hasNew = cols.some(c => c.name === to);
+  if (hasOld && !hasNew) {
+    // Add new column and copy data
+    try { sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${to} TEXT NOT NULL DEFAULT ''`); } catch { /* ok */ }
+    sqlite.exec(`UPDATE ${table} SET ${to} = ${from} WHERE ${to} = '' OR ${to} IS NULL`);
+    console.log(`[db] Migrated ${table}.${from} -> ${to}`);
+  }
+}
+
 addCol(`ALTER TABLE family_settings ADD COLUMN reading_level_override TEXT`);
+
+// Add reflection and replay_date to trades if missing (added in a later schema version)
+addCol(`ALTER TABLE trades ADD COLUMN reflection TEXT`);
+addCol(`ALTER TABLE trades ADD COLUMN replay_date TEXT`);
 
 console.log('[db] Tables ready at', dbPath);
 sqlite.close();
