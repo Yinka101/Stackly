@@ -1,12 +1,14 @@
 services:
-  # ── API (Hono + Bun) ─────────────────────────────────────────────────────
+  # ── Stackly: API + frontend served from one Hono process ─────────────────
+  # No separate static site — Hono serves dist/ directly.
+  # This eliminates all SPA rewrite-rule issues on Render.
   - type: web
     name: stackly-api
     runtime: node
     buildCommand: >
       curl -fsSL https://bun.sh/install | bash &&
       $HOME/.bun/bin/bun install &&
-      echo "BUN_PATH=$HOME/.bun/bin/bun" >> $RENDER_BUILD_VARS 2>/dev/null || true
+      VITE_API_URL="" VITE_DEMO_MODE=true $HOME/.bun/bin/bunx vite build
     startCommand: "$HOME/.bun/bin/bun server/index.ts"
     envVars:
       - key: NODE_ENV
@@ -15,8 +17,6 @@ services:
         value: sandbox
       - key: PAYPAL_BASE_URL
         value: https://api-m.sandbox.paypal.com
-      - key: CORS_ORIGIN
-        value: https://stackly-web.onrender.com
       - key: DATABASE_URL
         value: /opt/render/project/src/stackly.db
       - key: PAYPAL_CLIENT_ID
@@ -29,22 +29,3 @@ services:
         generateValue: true
       - key: DEMO_MODE
         value: "true"
-
-  # ── Web (Vite static) ─────────────────────────────────────────────────────
-  - type: web
-    name: stackly-web
-    runtime: static
-    buildCommand: >
-      curl -fsSL https://bun.sh/install | bash &&
-      $HOME/.bun/bin/bun install &&
-      $HOME/.bun/bin/bunx vite build
-    staticPublishPath: ./dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://stackly-a1ke.onrender.com
-      - key: VITE_DEMO_MODE
-        value: "true"
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html

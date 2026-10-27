@@ -1,7 +1,10 @@
 import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 // Run DB migrations + seed before anything else
 try {
@@ -25,11 +28,9 @@ import { sessionMiddleware } from './middleware/session.js';
 
 const app = new Hono();
 
-// Accept any origin in dev; restrict in production via CORS_ORIGIN env var
+// CORS — in production allow same origin (no separate frontend host)
 const rawOrigin = process.env.CORS_ORIGIN;
-const allowedOrigins = rawOrigin
-  ? rawOrigin.split(',').map(o => o.trim())
-  : null; // null = allow all (dev mode)
+const allowedOrigins = rawOrigin ? rawOrigin.split(',').map(o => o.trim()) : null;
 
 app.use('*', logger());
 app.use('*', cors({
@@ -45,19 +46,35 @@ app.use('*', cors({
 }));
 app.use('*', sessionMiddleware);
 
+// ── API routes ────────────────────────────────────────────────────────────────
 app.get('/health', (c) => c.json({ ok: true, ts: Date.now(), env: process.env.NODE_ENV }));
 
-app.route('/auth', authRouter);
-app.route('/profiles', profilesRouter);
-app.route('/lessons', lessonsRouter);
+app.route('/auth',      authRouter);
+app.route('/profiles',  profilesRouter);
+app.route('/lessons',   lessonsRouter);
 app.route('/portfolio', portfolioRouter);
-app.route('/paypal', paypalRouter);
-app.route('/ai', aiRouter);
-app.route('/invest', investRouter);
-app.route('/agent', agentRouter);
-app.route('/family', familyRouter);
+app.route('/paypal',    paypalRouter);
+app.route('/ai',        aiRouter);
+app.route('/invest',    investRouter);
+app.route('/agent',     agentRouter);
+app.route('/family',    familyRouter);
 
-app.notFound((c) => c.json({ error: 'not found' }, 404));
+// ── Serve built frontend (dist/) — SPA fallback to index.html ────────────────
+// In dev this block is skipped (dist/ doesn't exist); Vite dev server handles it.
+const distPath = join(process.cwd(), 'dist');
+if (existsSync(distPath)) {
+  // Serve static assets (JS, CSS, images, config.json)
+  app.use('/*', serveStatic({ root: './dist' }));
+
+  // SPA fallback — any route not matched above returns index.html
+  const indexHtml = readFileSync(join(distPath, 'index.html'), 'utf-8');
+  app.get('/*', (c) => c.html(indexHtml));
+
+  console.log('[server] Serving frontend from ./dist');
+} else {
+  console.log('[server] No ./dist found — frontend served by Vite dev server');
+}
+
 app.onError((err, c) => {
   console.error('[server] unhandled error:', err.message);
   return c.json({ error: 'internal server error' }, 500);
