@@ -6,6 +6,7 @@ import PerformanceChart from './invest/PerformanceChart';
 import HoldingsGrid from './invest/HoldingsGrid';
 import TradeModal from './invest/TradeModal';
 import WhatIfCalc from './invest/WhatIfCalc';
+import ReplayModal from './invest/ReplayModal';
 import { Skeleton } from '@/components/ui/Skeleton';
 import ErrorState from '@/components/ui/ErrorState';
 import EmptyState from '@/components/ui/EmptyState';
@@ -33,6 +34,7 @@ export default function InvestPage() {
   const { trades, reload: reloadTrades } = useTrades();
   const [tab, setTab]               = useState<Tab>('overview');
   const [tradeTarget, setTradeTarget] = useState<TradeTarget | null>(null);
+  const [showReplay, setShowReplay]   = useState(false);
 
   function openTrade(ticker: string, side: 'buy' | 'sell') {
     const info = tickers.find((t) => t.ticker === ticker);
@@ -234,6 +236,16 @@ export default function InvestPage() {
 
       <div id="panel-history" role="tabpanel" aria-labelledby="tab-history"
            hidden={tab !== 'history'}>
+        {/* Replay entry point */}
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm text-ink/60">Trade history from your practice portfolio.</p>
+          <button
+            onClick={() => setShowReplay(true)}
+            className="flex items-center gap-2 bg-accent/15 hover:bg-accent/25 text-accent-dark font-semibold text-sm px-4 py-2 rounded-xl transition-colors min-h-[44px]"
+          >
+            ▶ Time Replay
+          </button>
+        </div>
         <div className="bg-surface rounded-2xl border border-border overflow-hidden">
           {trades.length === 0 ? (
             <EmptyState emoji="📋" title="No trades yet" body="Your trade history will appear here." />
@@ -279,6 +291,18 @@ export default function InvestPage() {
            hidden={tab !== 'whatif'}>
         <WhatIfCalc />
       </div>
+
+      {/* Replay modal */}
+      {showReplay && (
+        <ReplayModal
+          onStarted={(_id, _date) => {
+            setShowReplay(false);
+            setTab('history');
+            void reloadTrades();
+          }}
+          onClose={() => setShowReplay(false)}
+        />
+      )}
 
       {/* Trade modal */}
       {tradeTarget && (

@@ -480,6 +480,36 @@ router.post('/orders/:id/approve', requireParent, async (c) => {
   return c.json({ approved: true, approveLink });
 });
 
+// ── POST /paypal/orders/:id/decline — parent declines pending order ───────────
+router.post('/orders/:id/decline', requireParent, async (c) => {
+  const session = c.get('session')!;
+  const orderId = c.req.param('id');
+
+  const [order] = await db
+    .select()
+    .from(paypalOrders)
+    .where(eq(paypalOrders.id, orderId));
+
+  if (!order) return c.json({ error: 'Order not found' }, 404);
+  if (order.parentId !== session.ownerId) return c.json({ error: 'Forbidden' }, 403);
+  if (order.status !== 'created') return c.json({ error: 'Order already processed' }, 409);
+
+  await db
+    .update(paypalOrders)
+    .set({ status: 'declined' })
+    .where(eq(paypalOrders.id, orderId));
+
+  emitOrderEvent(orderId, {
+    type: 'parent_declined',
+    label: '❌ Parent declined',
+    detail: 'Your parent said no this time. You can try a different kit.',
+    tech: 'Order status → DECLINED (internal)',
+  });
+
+  console.log('[paypal] parent declined orderId=%s', orderId);
+  return c.json({ declined: true });
+});
+
 export { sseClients };
 export default router;
 

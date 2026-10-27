@@ -15,7 +15,9 @@ export function useSse(orderId: string | null) {
   useEffect(() => {
     if (!orderId) return;
 
-    const es = new EventSource(`/api/paypal/orders/${orderId}/events`, { withCredentials: true });
+    // Same-origin in production (Hono serves frontend); /api proxy in dev
+    const base = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? '';
+    const es = new EventSource(`${base}/paypal/orders/${orderId}/events`, { withCredentials: true });
     esRef.current = es;
 
     es.onmessage = (e) => {

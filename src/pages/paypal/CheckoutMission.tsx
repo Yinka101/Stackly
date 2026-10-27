@@ -70,6 +70,20 @@ export function CheckoutMission({ band, learnerId, onComplete, onBack }: Props) 
   const order = usePayPalOrder();
   const { events } = useSse(order.orderId);
 
+  // React to SSE events from the server — advance the order stage automatically
+  useEffect(() => {
+    if (!events.length) return;
+    const last = events[events.length - 1];
+    if (last.type === 'parent_approved' && order.stage === 'pending_approval') {
+      // approveLink already in order state from createOrder; re-confirm with SSE payload
+      order.onParentApproved(order.approveLink ?? '');
+    }
+    if (last.type === 'parent_declined' && order.stage === 'pending_approval') {
+      order.setStageDeclined();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events]);
+
   // Load kits
   useEffect(() => {
     request<{ kits: Kit[] }>('/paypal/kits')

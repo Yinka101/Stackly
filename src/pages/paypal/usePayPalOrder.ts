@@ -151,6 +151,11 @@ export function usePayPalOrder() {
     }
   }, [orderId]);
 
+  const setStageDeclined = useCallback(() => {
+    setStage('declined');
+    setError('A parent declined this purchase.');
+  }, []);
+
   const reset = useCallback(() => {
     clearPoll();
     popupRef.current?.close();
@@ -163,6 +168,6 @@ export function usePayPalOrder() {
 
   return {
     stage, orderId, approveLink, result, error,
-    createOrder, onParentApproved, openPopup, capture, reset,
+    createOrder, onParentApproved, setStageDeclined, openPopup, capture, reset,
   };
 }

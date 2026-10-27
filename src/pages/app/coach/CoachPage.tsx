@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useId } from 'react';
 import { useSession } from '@/lib/session';
+import { useSearchParams } from 'react-router-dom';
 import Seedling from '@/assets/Seedling';
 import { useCoach } from './useCoach';
 import QuizCard from './QuizCard';
@@ -40,8 +41,11 @@ const TAB_META: { id: Tab; label: string; short: string }[] = [
 export default function CoachPage() {
   const { user } = useSession();
   const { messages, loading, error, sendMessage } = useCoach();
-  const [input, setInput]         = useState('');
-  const [activeTab, setActiveTab] = useState<Tab>('chat');
+  const [searchParams] = useSearchParams();
+  const [input, setInput] = useState('');
+  // Honour ?tab= from URL (e.g. from LearnerHome agent shortcut)
+  const initialTab = (searchParams.get('tab') as Tab | null) ?? 'chat';
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const bottomRef  = useRef<HTMLDivElement>(null);
   const inputRef   = useRef<HTMLTextAreaElement>(null);
   const inputId    = useId();

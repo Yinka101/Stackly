@@ -24,6 +24,7 @@ export function ParentApprovalCard({ familyId: _familyId, onApproved }: Props) {
   const [orders, setOrders] = useState<PendingOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState<string | null>(null);
+  const [declining, setDeclining] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
@@ -38,6 +39,19 @@ export function ParentApprovalCard({ familyId: _familyId, onApproved }: Props) {
   };
 
   useEffect(() => { void load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const decline = async (orderId: string) => {
+    setDeclining(orderId);
+    setError(null);
+    try {
+      await request<{ declined: boolean }>(`/paypal/orders/${orderId}/decline`, { method: 'POST' });
+      setOrders(prev => prev.filter(o => o.orderId !== orderId));
+    } catch (e) {
+      setError((e as Error).message ?? 'Could not decline. Please try again.');
+    } finally {
+      setDeclining(null);
+    }
+  };
 
   const approve = async (orderId: string) => {
     setApproving(orderId);
@@ -88,8 +102,15 @@ export function ParentApprovalCard({ familyId: _familyId, onApproved }: Props) {
 
           <div className="flex gap-2">
             <button
+              onClick={() => void decline(order.orderId)}
+              disabled={declining === order.orderId || approving === order.orderId}
+              className="flex-1 py-3 rounded-xl border-2 border-red-300 text-red-600 font-bold disabled:opacity-50 hover:bg-red-50 transition-colors"
+            >
+              {declining === order.orderId ? 'Declining…' : '❌ Decline'}
+            </button>
+            <button
               onClick={() => void approve(order.orderId)}
-              disabled={approving === order.orderId}
+              disabled={approving === order.orderId || declining === order.orderId}
               className="flex-1 py-3 rounded-xl bg-[var(--primary)] text-white font-bold disabled:opacity-50"
             >
               {approving === order.orderId ? 'Approving…' : '✅ Approve'}

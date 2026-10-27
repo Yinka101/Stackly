@@ -79,7 +79,7 @@ function StatCard({ emoji, label, value }: { emoji: string; label: string; value
 const QUICK_LINKS = [
   { emoji: '📚', label: 'Continue learning', to: '/app/learn' },
   { emoji: '📈', label: 'Check portfolio',   to: '/app/invest' },
-  { emoji: '🤖', label: 'Ask Penny',         to: '/app/coach' },
+  { emoji: '🤖', label: 'Ask Penny',         to: '/app/coach?tab=chat' },
   { emoji: '💳', label: 'PayPal Lab',        to: '/app/paypal' },
 ];
 
@@ -188,6 +188,21 @@ export default function LearnerHome() {
             Start now →
           </Link>
         </section>
+
+        {/* Penny Agent shortcut */}
+        <Link
+          to="/app/coach?tab=agent"
+          className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20
+                     rounded-2xl p-4 flex items-center gap-3 hover:border-primary/40
+                     active:scale-[0.98] transition-all min-h-[56px]
+                     focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          <span className="text-3xl" aria-hidden="true">✨</span>
+          <div>
+            <p className="font-display font-semibold text-sm text-ink">Talk to Penny's Agent</p>
+            <p className="text-xs text-ink/60">Say "help me start a lemonade stand" →</p>
+          </div>
+        </Link>
 
         {/* Quick links */}
         <nav aria-label="Quick links" className="grid grid-cols-2 gap-3">

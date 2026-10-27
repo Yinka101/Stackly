@@ -175,6 +175,8 @@ bun run test:e2e
 
 The **Demo** button (bottom-right of the live site) shows all credentials inline and lets you reset the demo family with one click.
 
+> **⚠️ For judges:** The AI Coach and Agent features require `OPENAI_API_KEY` to be set on the `stackly-api` Render service. Without it the Coach falls back to offline canned answers and the Agent cannot call the LLM. Set it in the Render dashboard → `stackly-api` → Environment before testing. GPT-4o-mini is used by default — any OpenAI-compatible key works.
+
 ---
 
 ## AI tools used

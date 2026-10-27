@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
+import { useSession } from '@/lib/session';
 import CelebrationModal from './CelebrationModal';
 import type { LessonDetail, CompleteResult, Badge } from './types';
 
@@ -9,6 +10,7 @@ type Phase = 'story' | 'try-it' | 'quiz' | 'done';
 export default function LessonReader() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
+  const { refresh } = useSession();
   const [lesson, setLesson] = useState<LessonDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState<Phase>('story');
@@ -181,6 +183,8 @@ export default function LessonReader() {
       const result = await api.post<CompleteResult>(`/lessons/${lesson.id}/complete`, {});
       setXpEarned(result.xpEarned);
       setNewBadges(result.newBadges ?? []);
+      // Refresh session so LearnerHome XP ring updates before modal closes
+      void refresh();
       setCelebrating(true);
     };
 
