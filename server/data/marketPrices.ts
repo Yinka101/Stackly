@@ -22,8 +22,10 @@ export interface PriceFile {
   tickers: Record<string, DayBar[]>;
 }
 
-const LIVE_PATH     = join(__dirname, '../../Stackly/apps/api/src/data/market/prices.json');
-const FALLBACK_PATH = join(__dirname, '../../Stackly/apps/api/src/data/market/prices-fallback.json');
+// prices.json — optional live fetch (gitignored, not present on Render)
+const LIVE_PATH     = join(__dirname, 'market/prices.json');
+// prices-fallback.json — synthetic CC0 data, committed alongside this file
+const FALLBACK_PATH = join(__dirname, 'market/prices-fallback.json');
 
 let _cache: PriceFile | null = null;
 let _loadedAt = 0;
@@ -38,7 +40,16 @@ export function getPriceFile(): PriceFile {
     _loadedAt = Date.now();
     return _cache;
   } catch {
-    throw new Error('Could not load market price data');
+    // Return a safe empty file so the server doesn't crash — tickers will show as empty
+    _cache = {
+      generatedAt: new Date().toISOString(),
+      source: 'synthetic',
+      attribution: 'Fallback',
+      disclaimer: 'Practice money only. Not real market data.',
+      tickers: {},
+    };
+    _loadedAt = Date.now();
+    return _cache;
   }
 }
 
