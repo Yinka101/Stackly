@@ -24,15 +24,24 @@ export default function ParentFamily() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-4 pt-6 pb-3 border-b border-ink/8 bg-canvas">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-2">
           <h1 className="font-display text-xl font-bold text-ink">My family</h1>
-          <button
-            onClick={() => nav('/onboarding/add-learner')}
-            className="bg-primary text-white font-semibold rounded-xl px-4 py-2 text-sm
-                       hover:bg-primary/90 active:scale-95 transition-all min-h-[40px]"
-          >
-            + Add learner
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => nav('/onboarding/learner-select')}
+              className="border-2 border-primary text-primary font-semibold rounded-xl px-4 py-2 text-sm
+                         hover:bg-primary/10 active:scale-95 transition-all min-h-[40px]"
+            >
+              Switch to learner
+            </button>
+            <button
+              onClick={() => nav('/onboarding/add-learner')}
+              className="bg-primary text-white font-semibold rounded-xl px-4 py-2 text-sm
+                         hover:bg-primary/90 active:scale-95 transition-all min-h-[40px]"
+            >
+              + Add learner
+            </button>
+          </div>
         </div>
 
         {/* Tab bar */}

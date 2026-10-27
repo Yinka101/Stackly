@@ -19,7 +19,7 @@ const AVATAR_EMOJI: Record<string, string> = {
   seedling: '🌱', chart: '📈',
 };
 
-const DEMO_FAMILY_EMAIL = 'parent@demo.stackly';
+const DEMO_FAMILY_EMAIL = 'demo@stackly.app';
 
 export default function LearnerSelect() {
   const nav = useNavigate();
