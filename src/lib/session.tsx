@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from 'react';
 import { api, tokenStore } from './api';
@@ -44,6 +45,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [user,    setUser]    = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Timestamp of the last setUserFromLogin call. refresh() will not clear the
+  // token for 5 s after a fresh login - prevents the race where mounted
+  // components fire /auth/me before the server has flushed the new session row.
+  const loginTimestampRef = useRef<number>(0);
+
   const refresh = useCallback(async () => {
     // If no token is stored at all, skip the network call immediately.
     if (!tokenStore.get()) {
@@ -77,17 +83,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       });
     } catch (err) {
       // Only clear the token on a definitive 401 - NOT on a timeout or network
-      // error. A slow cold-start should not log the user out.
+      // error, and NOT within 5 s of a fresh login (race window).
       const isUnauthorized =
         err instanceof Error &&
         (err.message.includes('401') || err.message.toLowerCase().includes('unauthorized'));
 
-      if (isUnauthorized) {
+      const justLoggedIn = Date.now() - loginTimestampRef.current < 5_000;
+
+      if (isUnauthorized && !justLoggedIn) {
         tokenStore.clear();
         setUser(null);
       }
-      // On timeout / network error: leave whatever user state we had.
-      // If user was null (fresh load), they stay on the page they're on.
+      // On timeout / network error, or within the login grace window:
+      // leave whatever user state we had.
     } finally {
       setLoading(false);
     }
@@ -97,9 +105,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
    * Called immediately after a successful login response.
    * Sets a minimal user object from the login payload so the app can
    * navigate without waiting for a second /auth/me round-trip.
+   * Also stamps loginTimestampRef so refresh() won't fight it.
    */
   const setUserFromLogin = useCallback(
     (data: { role: 'parent' | 'learner'; familyId: string; token: string }) => {
+      loginTimestampRef.current = Date.now();
       setUser({
         role:     data.role,
         familyId: data.familyId,
