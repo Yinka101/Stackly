@@ -62,7 +62,7 @@ export default function ParentConsent() {
                      transition-all focus-visible:outline-2 focus-visible:outline-offset-2
                      focus-visible:outline-primary min-h-[56px]"
         >
-          I agree — continue
+          I agree - continue
         </button>
       </div>
     </div>

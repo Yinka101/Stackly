@@ -51,7 +51,7 @@ export default function FamilyPrivacy() {
       URL.revokeObjectURL(url);
       showToast('Data exported successfully.');
     } catch {
-      showToast('Export failed — please try again.');
+      showToast('Export failed - please try again.');
     } finally {
       setExporting(null);
     }

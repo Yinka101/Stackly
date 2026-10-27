@@ -54,7 +54,7 @@ export default function PathMap() {
       <EmptyState
         emoji="📚"
         title="No lessons yet"
-        body="Check back soon — new lessons are coming!"
+        body="Check back soon - new lessons are coming!"
       />
     </div>
   );
@@ -82,7 +82,7 @@ export default function PathMap() {
               </span>
             </div>
 
-            {/* Progress bar — labelled for screen readers */}
+            {/* Progress bar - labelled for screen readers */}
             <div
               role="progressbar"
               aria-valuenow={pct}
@@ -127,7 +127,7 @@ function LessonNode({ lesson, isLast, onClick }: {
   const isLocked  = lesson.status === 'locked';
 
   const statusLabel = isDone ? 'completed' : isCurrent ? 'ready to start' : 'locked';
-  const ariaLabel = `${lesson.title} — ${statusLabel}${isDone ? `, +${lesson.xpReward} XP earned` : ''}`;
+  const ariaLabel = `${lesson.title} - ${statusLabel}${isDone ? `, +${lesson.xpReward} XP earned` : ''}`;
 
   return (
     <div className="flex gap-3" role="listitem">
@@ -149,7 +149,7 @@ function LessonNode({ lesson, isLast, onClick }: {
         )}
       </div>
 
-      {/* Card — single focusable element */}
+      {/* Card - single focusable element */}
       <button
         onClick={onClick}
         disabled={isLocked}

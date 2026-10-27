@@ -157,7 +157,7 @@ export default function ProfileScreen({ profile, onBalanceChange, onLogout }: Pr
                     onClick={() => setCaptureStep(true)}
                     className="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:border-blue-300 transition-colors"
                   >
-                    I approved it — claim my dollars
+                    I approved it - claim my dollars
                   </button>
                 </>
               ) : (
@@ -170,7 +170,7 @@ export default function ProfileScreen({ profile, onBalanceChange, onLogout }: Pr
                     disabled={busy}
                     className="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-40"
                   >
-                    {busy ? 'Capturing…' : 'Confirm — Add Practice Dollars'}
+                    {busy ? 'Capturing…' : 'Confirm - Add Practice Dollars'}
                   </button>
                 </>
               )}

@@ -36,7 +36,7 @@ export default function LearnerSelect() {
         .catch(() => setError('Could not load learners'))
         .finally(() => setLoading(false));
     } else {
-      // Prompt to log in as parent first — or demo
+      // Prompt to log in as parent first - or demo
       setLoading(false);
     }
   }, [user]);
@@ -89,7 +89,7 @@ export default function LearnerSelect() {
         </div>
 
         {learners.length === 0 && (
-          <p className="text-ink/50 text-sm mt-4">No learners yet — add one from your parent account.</p>
+          <p className="text-ink/50 text-sm mt-4">No learners yet - add one from your parent account.</p>
         )}
 
         <button onClick={() => nav('/onboarding/add-learner')}

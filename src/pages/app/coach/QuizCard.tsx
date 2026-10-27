@@ -28,7 +28,7 @@ export default function QuizCard() {
         question: 'What does compound growth mean?',
         options: ['Earning interest on interest', 'Buying shares', 'Paying fees', 'Opening a bank account'],
         correctIndex: 0,
-        explanation: 'Compound growth means your earnings also earn more — like a snowball getting bigger as it rolls.',
+        explanation: 'Compound growth means your earnings also earn more - like a snowball getting bigger as it rolls.',
       });
     } finally {
       setLoading(false);

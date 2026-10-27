@@ -6,18 +6,18 @@ const STEPS = [
     num: '01',
     emoji: '📖',
     title: 'Learn',
-    body: 'Short lessons teach you how money moves — what PayPal is, what investing means, and why starting early matters. Written for your age, not your parents\'.',
+    body: 'Short lessons teach you how money moves - what PayPal is, what investing means, and why starting early matters. Written for your age, not your parents\'.',
   },
   {
     num: '02',
     emoji: '💸',
     title: 'Practice',
-    body: 'Use Practice Dollars to send a fake PayPal payment or buy shares in a paper portfolio. You can\'t lose real money. Make mistakes on purpose — that\'s how it works.',
+    body: 'Use Practice Dollars to send a fake PayPal payment or buy shares in a paper portfolio. You can\'t lose real money. Make mistakes on purpose - that\'s how it works.',
   },
   {
     num: '03',
     emoji: '🤝',
-    title: 'Do it for real — with a parent',
+    title: 'Do it for real - with a parent',
     body: 'Ready to try a real PayPal payment? A parent approves it from their account. You learn; they stay in control. No card details, no surprises.',
   },
 ];

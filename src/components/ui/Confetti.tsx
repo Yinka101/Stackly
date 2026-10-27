@@ -18,7 +18,7 @@ interface Particle {
   life: number;
 }
 
-/** Canvas confetti — honours prefers-reduced-motion (shows static burst only). */
+/** Canvas confetti - honours prefers-reduced-motion (shows static burst only). */
 export default function Confetti({ active, onDone }: ConfettiProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);

@@ -5,17 +5,17 @@ const MESSAGES: { role: 'coach' | 'kid'; text: string }[] = [
   { role: 'kid', text: 'What is compound growth?' },
   {
     role: 'coach',
-    text: "Great question! Compound growth means your money earns returns — and then those returns earn returns too. It's like a snowball rolling downhill: the longer it rolls, the bigger it gets.",
+    text: "Great question! Compound growth means your money earns returns - and then those returns earn returns too. It's like a snowball rolling downhill: the longer it rolls, the bigger it gets.",
   },
   { role: 'kid', text: 'Can you show me an example?' },
   {
     role: 'coach',
-    text: "Sure! Say you plant $5 today. At 7% a year, after 10 years it becomes about $9.84. After 20 years it's $19.35 — almost 4× your original $5. The longer you wait, the harder your money works. This is an example to help you understand — not a prediction of real returns.",
+    text: "Sure! Say you plant $5 today. At 7% a year, after 10 years it becomes about $9.84. After 20 years it's $19.35 - almost 4× your original $5. The longer you wait, the harder your money works. This is an example to help you understand - not a prediction of real returns.",
   },
   { role: 'kid', text: 'So I should invest now?' },
   {
     role: 'coach',
-    text: "Learning now is the first step — and that's exactly what you're doing! Stackly uses practice money, so you can explore without any real risk. When you're ready to use real money, make sure a parent or guardian is involved.",
+    text: "Learning now is the first step - and that's exactly what you're doing! Stackly uses practice money, so you can explore without any real risk. When you're ready to use real money, make sure a parent or guardian is involved.",
   },
 ];
 
@@ -111,7 +111,7 @@ export default function CoachPreviewSection() {
             Ask anything. Get a real answer.
           </h2>
           <p className="text-[var(--color-ink-muted)] max-w-md mx-auto">
-            Penny explains money concepts in plain language — matched to your age and learning level.
+            Penny explains money concepts in plain language - matched to your age and learning level.
           </p>
         </div>
 
@@ -185,13 +185,13 @@ export default function CoachPreviewSection() {
             )}
           </div>
 
-          {/* Disabled input — this is a preview */}
+          {/* Disabled input - this is a preview */}
           <div className="border-t border-[var(--color-border)] px-4 py-3 flex gap-2 items-center">
             <input
               type="text"
               placeholder="Sign up to ask Penny anything…"
               disabled
-              aria-label="Chat input — sign up to use"
+              aria-label="Chat input - sign up to use"
               className="flex-1 px-4 py-2.5 rounded-[var(--radius-xl)] bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-sm text-[var(--color-ink-muted)] cursor-not-allowed outline-none"
             />
             <button

@@ -1,11 +1,11 @@
 /**
- * Thin fetch wrapper — sends session token from localStorage as Bearer header.
+ * Thin fetch wrapper - sends session token from localStorage as Bearer header.
  *
  * API_BASE resolution (runtime, not build-time):
  *   1. /config.json served by the static host (update this file to change the
- *      API URL without rebuilding — Render copies public/ into dist/ as-is).
+ *      API URL without rebuilding - Render copies public/ into dist/ as-is).
  *   2. import.meta.env.VITE_API_URL baked in at Vite build time.
- *   3. /api — Vite dev-proxy rewrites to http://localhost:3001.
+ *   3. /api - Vite dev-proxy rewrites to http://localhost:3001.
  */
 
 // Baked-in fallback (used while config.json hasn't loaded yet, or in dev)
@@ -13,7 +13,7 @@ const BAKED_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace
 
 let _resolvedBase: string = BAKED_BASE;
 
-// Load config.json once and cache it — subsequent calls use the cached value.
+// Load config.json once and cache it - subsequent calls use the cached value.
 let _configLoaded = false;
 async function loadConfig(): Promise<void> {
   if (_configLoaded) return;

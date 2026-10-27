@@ -31,7 +31,7 @@
   --text-3xl: 40px;
 }
 
-/* ── Sprouts — bigger, brighter ─────────────────────────────────────────── */
+/* ── Sprouts - bigger, brighter ─────────────────────────────────────────── */
 [data-theme='sprouts'] {
   --color-canvas: #fffbf0;
   --color-surface: #ffffff;
@@ -52,7 +52,7 @@
   --text-3xl: 52px;
 }
 
-/* ── Investors — calmer, denser ─────────────────────────────────────────── */
+/* ── Investors - calmer, denser ─────────────────────────────────────────── */
 [data-theme='investors'] {
   --color-canvas: #f4f6f9;
   --color-surface: #ffffff;
@@ -189,7 +189,7 @@ h1, h2, h3, h4, h5, h6 {
 .border-border   { border-color: var(--color-border); }
 .bg-canvas-raised { background-color: var(--color-surface-raised); }
 
-/* ── Page transition — under 200ms, no layout shift ─────────────────────── */
+/* ── Page transition - under 200ms, no layout shift ─────────────────────── */
 .page-enter {
   animation: fade-in 0.15s ease forwards;
 }

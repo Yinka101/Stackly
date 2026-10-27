@@ -44,7 +44,7 @@ export default function HeroSection() {
 
           <p className="text-[var(--text-lg)] text-[var(--color-ink-muted)] leading-relaxed mb-8 max-w-md">
             Practice PayPal and investing with practice money, real
-            lessons, and an AI coach. No real money on the line — ever.
+            lessons, and an AI coach. No real money on the line - ever.
           </p>
 
           <div className="flex flex-wrap gap-3">

@@ -1,5 +1,5 @@
 /**
- * BehindTheScenes — streams PayPal events from SSE in plain language,
+ * BehindTheScenes - streams PayPal events from SSE in plain language,
  * with technical name in small text for older learners.
  */
 import { useEffect, useRef } from 'react';

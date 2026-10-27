@@ -1,5 +1,5 @@
 /**
- * ReplayModal — lets the learner pick a historical start month and begin a
+ * ReplayModal - lets the learner pick a historical start month and begin a
  * Replay session. Called from InvestPage History tab.
  */
 import { useState } from 'react';

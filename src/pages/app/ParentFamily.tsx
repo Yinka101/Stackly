@@ -43,14 +43,14 @@ export default function ParentFamily() {
   const [pinError, setPinError] = useState('');
   const [pinLoading, setPinLoading] = useState(false);
 
-  // Demo fallback learners — always shown when the API fetch fails (e.g. stale token in preview)
+  // Demo fallback learners - always shown when the API fetch fails (e.g. stale token in preview)
   const DEMO_LEARNERS: LearnerRow[] = [
     { id: 'demo-learner-sam', nickname: 'Sprout Sam',   band: 'sprouts',   avatar: 'seedling', xp: 120 },
     { id: 'demo-learner-ben', nickname: 'Builder Ben',  band: 'builders',  avatar: 'rocket',   xp: 340 },
     { id: 'demo-learner-ivy', nickname: 'Investor Ivy', band: 'investors', avatar: 'chart',    xp: 780 },
   ];
 
-  // Fetch learner list — fall back to demo learners on any failure
+  // Fetch learner list - fall back to demo learners on any failure
   useEffect(() => {
     api.get<LearnerRow[]>('/auth/learners')
       .then((rows) => setLearners(rows.length > 0 ? rows : DEMO_LEARNERS))
@@ -78,7 +78,7 @@ export default function ParentFamily() {
         setUserFromLogin({ role: 'learner', familyId: res.familyId, token: res.token });
         nav('/app/home', { replace: true });
       } catch {
-        setPinError('Wrong PIN — try again');
+        setPinError('Wrong PIN - try again');
         setPin('');
         setPinLoading(false);
       }
@@ -105,7 +105,7 @@ export default function ParentFamily() {
                                 rounded-2xl shadow-xl p-2 min-w-[220px] flex flex-col gap-1">
                   {learners.length === 0 && (
                     <p className="text-xs text-ink/50 px-3 py-2">
-                      No learners — try signing out and back in.
+                      No learners - try signing out and back in.
                     </p>
                   )}
                   {learners.map((l) => (
@@ -165,7 +165,7 @@ export default function ParentFamily() {
         </div>
       </div>
 
-      {/* Inline PIN modal — appears after picking a learner from the dropdown */}
+      {/* Inline PIN modal - appears after picking a learner from the dropdown */}
       {pinTarget && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
              onClick={(e) => { if (e.target === e.currentTarget) { setPinTarget(null); setPin(''); } }}>

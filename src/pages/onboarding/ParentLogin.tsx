@@ -33,7 +33,7 @@ export default function ParentLogin() {
     setLoading(true);
 
     const controller = new AbortController();
-    // 30 s — Render free tier cold-start can take ~25 s
+    // 30 s - Render free tier cold-start can take ~25 s
     const timer = setTimeout(() => controller.abort(), 30_000);
 
     try {
@@ -51,14 +51,14 @@ export default function ParentLogin() {
       }
 
       const data = await res.json() as LoginResponse;
-      // Store token then update session context directly — no second network
+      // Store token then update session context directly - no second network
       // call needed (avoids timeout race that would clear the token again).
       tokenStore.set(data.token);
       setUserFromLogin({ role: data.role, familyId: data.familyId, token: data.token });
       // useEffect above will navigate once user state updates
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
-        setError('The server is still waking up — wait 30 s and try again.');
+        setError('The server is still waking up - wait 30 s and try again.');
       } else {
         setError(err instanceof Error ? err.message : 'Something went wrong');
       }

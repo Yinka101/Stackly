@@ -4,7 +4,7 @@ import { useFadeIn } from './useFadeIn';
 const FAQS = [
   {
     q: 'Is this free?',
-    a: 'Yes. Every lesson, the paper portfolio, and the AI coach are completely free. Parents can optionally top up Practice Dollars with a real PayPal payment — but that\'s a choice, not a requirement.',
+    a: 'Yes. Every lesson, the paper portfolio, and the AI coach are completely free. Parents can optionally top up Practice Dollars with a real PayPal payment - but that\'s a choice, not a requirement.',
   },
   {
     q: 'Does my child use real money?',
@@ -15,7 +15,7 @@ const FAQS = [
     a: 'Lessons explain what PayPal is and how payments work. When a child is ready to try a real transaction, a parent initiates and approves it from their own PayPal account. Kids never enter payment details.',
   },
   {
-    q: 'What does the AI coach do — and not do?',
+    q: 'What does the AI coach do - and not do?',
     a: 'Penny answers questions about money, investing, and financial concepts in plain language matched to your child\'s age. Penny will not recommend buying or selling specific investments, and every response includes a reminder that it is not financial advice.',
   },
   {

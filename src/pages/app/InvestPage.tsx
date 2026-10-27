@@ -276,7 +276,7 @@ export default function InvestPage() {
                       <td className="px-3 py-2 tabular-nums">${(t.priceCents / 100).toFixed(2)}</td>
                       <td className="px-3 py-2 text-xs text-ink/50 max-w-[140px] truncate"
                           title={t.reflection ?? ''}>
-                        {t.reflection ?? '—'}
+                        {t.reflection ?? '-'}
                       </td>
                     </tr>
                   ))}

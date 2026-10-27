@@ -107,7 +107,7 @@ export default function Onboarding({ onDone }: Props) {
                 What's your nickname?
               </h2>
               <p className="text-xs text-slate-400 text-center mb-5">
-                No real name, no email — just a fun nickname
+                No real name, no email - just a fun nickname
               </p>
 
               {/* Avatar picker */}

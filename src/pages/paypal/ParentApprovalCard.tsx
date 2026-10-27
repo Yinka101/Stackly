@@ -1,5 +1,5 @@
 /**
- * ParentApprovalCard — shown to the parent when a learner has requested a kit purchase.
+ * ParentApprovalCard - shown to the parent when a learner has requested a kit purchase.
  * Fetches pending orders for the family and allows approval.
  */
 import { useState, useEffect } from 'react';
@@ -87,7 +87,7 @@ export function ParentApprovalCard({ familyId: _familyId, onApproved }: Props) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-semibold text-[var(--ink)]">{order.learnerNickname} wants to buy</p>
-              <p className="text-[var(--ink-muted)]">{order.kitName} — <strong>${order.amountUsd.toFixed(2)} USD</strong></p>
+              <p className="text-[var(--ink-muted)]">{order.kitName} - <strong>${order.amountUsd.toFixed(2)} USD</strong></p>
               <p className="text-sm text-[var(--primary)] mt-1">
                 Earns {order.practiceDollarsAwarded} Practice Dollars
               </p>

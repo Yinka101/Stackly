@@ -110,7 +110,7 @@ export default function CoachPage() {
         <div id="coach-panel-chat" role="tabpanel" aria-labelledby="coach-tab-chat"
              className="flex flex-col flex-1 min-h-0">
 
-          {/* Messages — aria-live so screen readers announce new responses */}
+          {/* Messages - aria-live so screen readers announce new responses */}
           <div
             className="flex-1 overflow-y-auto px-4 py-2 space-y-3"
             aria-live="polite"

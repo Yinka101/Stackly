@@ -16,9 +16,9 @@ const CAP_OPTIONS = [
 
 const LEVEL_OPTIONS = [
   { value: '',          label: 'Follow age band (default)' },
-  { value: 'sprouts',   label: 'Sprouts — ages 7–10' },
-  { value: 'builders',  label: 'Builders — ages 11–14' },
-  { value: 'investors', label: 'Investors — ages 15–24' },
+  { value: 'sprouts',   label: 'Sprouts - ages 7–10' },
+  { value: 'builders',  label: 'Builders - ages 11–14' },
+  { value: 'investors', label: 'Investors - ages 15–24' },
 ];
 
 export default function FamilyControls() {
@@ -59,7 +59,7 @@ export default function FamilyControls() {
             <p className="font-semibold text-ink text-sm">Allow Coach to suggest purchases</p>
             <p className="text-xs text-ink/50 mt-0.5">
               {settings.agentEnabled
-                ? 'Coach can propose kits — you always approve first'
+                ? 'Coach can propose kits - you always approve first'
                 : 'Coach will not suggest any purchases'}
             </p>
           </div>

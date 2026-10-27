@@ -1,5 +1,5 @@
 /**
- * GuidedSimMission — shared component for Missions 1 and 2.
+ * GuidedSimMission - shared component for Missions 1 and 2.
  * Steps through a SimStep array with a Stepper, coach tips, and interaction widgets.
  */
 import { useState, useEffect, useRef } from 'react';
@@ -145,7 +145,7 @@ export function GuidedSimMission({ steps, band, onComplete, onBack }: Props) {
 
       {/* Disclaimer */}
       <p className="text-xs text-center text-[var(--ink-muted)]">
-        Practice money only — not financial advice
+        Practice money only - not financial advice
       </p>
     </div>
   );

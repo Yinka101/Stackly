@@ -2,7 +2,7 @@ import { Component, type ReactNode, type ErrorInfo } from 'react';
 
 interface Props {
   children: ReactNode;
-  /** Custom fallback — receives error + reset function. */
+  /** Custom fallback - receives error + reset function. */
   fallback?: (error: Error, reset: () => void) => ReactNode;
 }
 
@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <span className="text-5xl mb-4" aria-hidden="true">😵</span>
         <h2 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h2>
         <p className="text-sm text-gray-500 mb-6 max-w-sm">
-          A part of this page crashed. Your data is safe — this is an isolated error.
+          A part of this page crashed. Your data is safe - this is an isolated error.
         </p>
         <button
           onClick={this.reset}

@@ -19,7 +19,7 @@ const BAND_MISSIONS: Record<string, string[]> = {
   ],
   investors: [
     'Read the "Risk vs reward" lesson and pass the quiz',
-    'Rebalance your portfolio — is it still 60/40?',
+    'Rebalance your portfolio - is it still 60/40?',
     'Ask Penny to compare index funds and single stocks',
   ],
 };
@@ -223,7 +223,7 @@ export default function LearnerHome() {
 
         {/* Educational disclaimer */}
         <p className="text-xs text-ink/40 text-center leading-relaxed text-balance">
-          All investing on Stackly uses Practice Dollars — not real money.
+          All investing on Stackly uses Practice Dollars - not real money.
           This is for learning only.
         </p>
       </div>

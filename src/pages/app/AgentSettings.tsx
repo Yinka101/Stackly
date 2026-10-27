@@ -1,5 +1,5 @@
 /**
- * AgentSettings — parent controls for the Coach agent.
+ * AgentSettings - parent controls for the Coach agent.
  * Toggle agent on/off and set a weekly spending cap.
  */
 import { useState, useEffect } from 'react';
@@ -80,7 +80,7 @@ export default function AgentSettings() {
         },
         body: JSON.stringify(next),
       });
-      setMsg(res.ok ? 'Saved!' : 'Could not save — try again');
+      setMsg(res.ok ? 'Saved!' : 'Could not save - try again');
     } catch {
       setMsg('Network error');
     } finally {

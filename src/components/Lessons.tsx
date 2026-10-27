@@ -164,7 +164,7 @@ export default function Lessons({ profile }: Props) {
                 </div>
                 {answered && (
                   <p className={`mt-3 text-sm font-medium ${selected === step.quiz.answer ? 'text-emerald-600' : 'text-red-500'}`}>
-                    {selected === step.quiz.answer ? 'Correct!' : `Not quite — the answer is: ${step.quiz.options[step.quiz.answer]}`}
+                    {selected === step.quiz.answer ? 'Correct!' : `Not quite - the answer is: ${step.quiz.options[step.quiz.answer]}`}
                   </p>
                 )}
               </div>

@@ -28,7 +28,7 @@ export default function SoundToggle() {
     <button
       onClick={toggleSound}
       aria-pressed={soundOn}
-      aria-label={soundOn ? 'Sound on — click to mute' : 'Sound off — click to enable'}
+      aria-label={soundOn ? 'Sound on - click to mute' : 'Sound off - click to enable'}
       className="flex items-center gap-1.5 text-xs text-ink/50 hover:text-ink
                  focus-visible:ring-2 focus-visible:ring-primary rounded-lg px-2 py-1
                  transition-colors min-h-[44px]"

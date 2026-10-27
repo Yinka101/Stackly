@@ -1,5 +1,5 @@
 /**
- * PayPalLabPage — the learner-facing PayPal Lab.
+ * PayPalLabPage - the learner-facing PayPal Lab.
  * Four missions unlocked sequentially. Parents see approval cards.
  */
 import { useState } from 'react';
@@ -143,13 +143,13 @@ export function PayPalLabPage() {
       <div>
         <h1 className="text-2xl font-bold text-[var(--ink)]">PayPal Lab</h1>
         <p className="text-[var(--ink-muted)] mt-1">
-          Learn how PayPal works by doing it yourself — safely, with practice money.
+          Learn how PayPal works by doing it yourself - safely, with practice money.
         </p>
       </div>
 
       {/* Disclaimer */}
       <div className="bg-[var(--accent)]/15 border border-[var(--accent)]/30 rounded-xl px-4 py-2 text-sm text-[var(--ink)]">
-        🧪 All transactions use PayPal Sandbox (test mode). Practice money only — not financial advice.
+        🧪 All transactions use PayPal Sandbox (test mode). Practice money only - not financial advice.
       </div>
 
       {/* Parent: approval cards */}

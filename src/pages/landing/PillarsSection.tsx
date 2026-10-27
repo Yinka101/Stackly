@@ -21,7 +21,7 @@ const PILLARS = [
     textColor: '#92400e',
     points: [
       'Start with 1,000 Practice Dollars',
-      'Buy and sell real tickers — fake money',
+      'Buy and sell real tickers - fake money',
       'See your portfolio grow (or shrink)',
       'Every screen is labelled "educational only"',
     ],

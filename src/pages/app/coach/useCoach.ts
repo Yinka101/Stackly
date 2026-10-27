@@ -1,6 +1,6 @@
 /**
  * Hook that manages the coach chat state and SSE streaming.
- * Each learner gets their own isolated context — no cross-learner data.
+ * Each learner gets their own isolated context - no cross-learner data.
  */
 import { useState, useCallback, useRef } from 'react';
 import { tokenStore } from '@/lib/api';
@@ -18,7 +18,7 @@ export function useCoach() {
       id: 'welcome',
       role: 'assistant',
       content:
-        "Hi! I'm Penny, your money coach 🌱 Ask me anything about money, PayPal, or investing — or try one of the buttons below!",
+        "Hi! I'm Penny, your money coach 🌱 Ask me anything about money, PayPal, or investing - or try one of the buttons below!",
     },
   ]);
   const [loading, setLoading] = useState(false);

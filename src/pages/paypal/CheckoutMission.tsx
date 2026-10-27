@@ -1,5 +1,5 @@
 /**
- * CheckoutMission — Mission 3: real PayPal sandbox checkout flow.
+ * CheckoutMission - Mission 3: real PayPal sandbox checkout flow.
  * Learner → picks kit → asks parent → parent approves → PayPal popup → receipt.
  * Handles cancel, decline, network error, closed popup without getting stuck.
  */
@@ -41,7 +41,7 @@ const STAGE_LABELS: Record<string, string> = {
 
 const COACH_TIPS: Record<string, Record<AgeBand, string>> = {
   idle: {
-    sprouts:   'Pick something to pretend-buy. This is practice — no real money!',
+    sprouts:   'Pick something to pretend-buy. This is practice - no real money!',
     builders:  'Each kit is a pretend purchase. You\'ll go through the full PayPal checkout just like a real transaction.',
     investors: 'You\'re about to run a full PayPal Orders v2 flow in the sandbox environment. Pick a kit to initiate.',
   },
@@ -58,7 +58,7 @@ const COACH_TIPS: Record<string, Record<AgeBand, string>> = {
   capturing: {
     sprouts:   'PayPal is checking everything is OK…',
     builders:  'The server is calling PayPal\'s capture endpoint to confirm the payment.',
-    investors: 'POST /v2/checkout/orders/{id}/capture — finalises the authorised payment.',
+    investors: 'POST /v2/checkout/orders/{id}/capture - finalises the authorised payment.',
   },
 };
 
@@ -70,7 +70,7 @@ export function CheckoutMission({ band, learnerId, onComplete, onBack }: Props) 
   const order = usePayPalOrder();
   const { events } = useSse(order.orderId);
 
-  // React to SSE events from the server — advance the order stage automatically
+  // React to SSE events from the server - advance the order stage automatically
   useEffect(() => {
     if (!events.length) return;
     const last = events[events.length - 1];
@@ -114,7 +114,7 @@ export function CheckoutMission({ band, learnerId, onComplete, onBack }: Props) 
 
       {/* Disclaimer banner */}
       <div className="bg-[var(--accent)]/15 border border-[var(--accent)]/30 rounded-xl px-4 py-2 text-sm text-[var(--ink)]">
-        🧪 <strong>Sandbox mode</strong> — Practice money only, not financial advice. No real money will move.
+        🧪 <strong>Sandbox mode</strong> - Practice money only, not financial advice. No real money will move.
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -183,7 +183,7 @@ export function CheckoutMission({ band, learnerId, onComplete, onBack }: Props) 
             </div>
           )}
 
-          {/* Approved — ready to open popup */}
+          {/* Approved - ready to open popup */}
           {order.stage === 'approved' && (
             <div className="card flex flex-col gap-3">
               <p className="text-[var(--ink)] font-semibold">✅ Parent approved!</p>

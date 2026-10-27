@@ -23,7 +23,7 @@ export default function PortfolioReview() {
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">📊</div>
         <div>
           <h3 className="font-display font-bold text-ink">Review my portfolio</h3>
-          <p className="text-xs text-ink/50">Practice money only — not financial advice</p>
+          <p className="text-xs text-ink/50">Practice money only - not financial advice</p>
         </div>
       </div>
 

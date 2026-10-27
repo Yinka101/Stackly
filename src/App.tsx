@@ -49,7 +49,7 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login-parent" element={<ParentLogin />} />
 
-      {/* Onboarding — redirect away if already signed in */}
+      {/* Onboarding - redirect away if already signed in */}
       <Route element={<RedirectIfAuthed />}>
         <Route path="/onboarding" element={<OnboardingFork />} />
         <Route path="/onboarding/parent" element={<ParentConsent />} />
@@ -62,10 +62,10 @@ export default function App() {
         <Route path="/onboarding/add-learner" element={<AddLearner />} />
       </Route>
 
-      {/* PIN login — public (parent must be logged in via cookie to list learners) */}
+      {/* PIN login - public (parent must be logged in via cookie to list learners) */}
       <Route path="/pin-login/:learnerId" element={<PinLogin />} />
 
-      {/* /app smart redirect — goes here before the protected shell */}
+      {/* /app smart redirect - goes here before the protected shell */}
       <Route path="/app" element={<AppRedirect />} />
 
       {/* Protected app shell */}

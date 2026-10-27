@@ -47,7 +47,7 @@ export default function ParentRegister() {
         </button>
 
         <h1 className="font-display text-2xl font-bold text-ink mb-1">Create your family account</h1>
-        <p className="text-ink/60 mb-8">Your details — your child never sees or enters these.</p>
+        <p className="text-ink/60 mb-8">Your details - your child never sees or enters these.</p>
 
         <form onSubmit={(e) => { void submit(e); }} className="flex flex-col gap-4">
           <Field label="Family name (optional)" placeholder="e.g. The Smiths">

@@ -1,5 +1,5 @@
 /**
- * DemoDrawer — floating help button visible in demo/dev mode.
+ * DemoDrawer - floating help button visible in demo/dev mode.
  *
  * Shows sandbox credentials, PayPal test cards, and a one-click demo reset.
  * Only renders when VITE_DEMO_MODE=true (set on Render for the judge demo).
@@ -67,7 +67,7 @@ export function DemoDrawer() {
       const data = await res.json() as { ok?: boolean; message?: string; error?: string };
       setResetMsg(data.ok ? '✅ ' + (data.message ?? 'Reset complete') : '❌ ' + (data.error ?? 'Reset failed'));
     } catch {
-      setResetMsg('❌ Network error — check the API is running');
+      setResetMsg('❌ Network error - check the API is running');
     } finally {
       setResetting(false);
     }
@@ -142,7 +142,7 @@ export function DemoDrawer() {
 
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-4 mb-1">If it's slow</h3>
           <p className="text-xs text-gray-500">
-            The API is on Render's free tier and may take up to 30 seconds to wake up after inactivity. Wait 30 seconds and try again — it will be instant after that.
+            The API is on Render's free tier and may take up to 30 seconds to wake up after inactivity. Wait 30 seconds and try again - it will be instant after that.
           </p>
         </div>
       </aside>

@@ -11,7 +11,7 @@ export default function PinLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Navigate only after session state is committed — same pattern as ParentLogin.
+  // Navigate only after session state is committed - same pattern as ParentLogin.
   useEffect(() => {
     if (user?.role === 'learner') nav('/app/home', { replace: true });
   }, [user, nav]);
@@ -30,7 +30,7 @@ export default function PinLogin() {
         setUserFromLogin({ role: 'learner', familyId: res.familyId, token: res.token });
         // navigation handled by useEffect above
       } catch {
-        setError('Wrong PIN — try again');
+        setError('Wrong PIN - try again');
         setPin('');
         setLoading(false);
       }

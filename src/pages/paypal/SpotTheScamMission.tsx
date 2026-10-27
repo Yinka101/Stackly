@@ -1,5 +1,5 @@
 /**
- * SpotTheScamMission — Mission 4: 6 client-side scam identification exercises.
+ * SpotTheScamMission - Mission 4: 6 client-side scam identification exercises.
  */
 import { useState } from 'react';
 import { scamExamples } from './missionData';
@@ -61,7 +61,7 @@ export function SpotTheScamMission({ band, onComplete, onBack }: Props) {
         </p>
         {score < scamExamples.length && (
           <p className="text-sm text-[var(--ink-muted)]">
-            Review the red flags on any you missed — they&apos;re the same tricks scammers use in real life.
+            Review the red flags on any you missed - they&apos;re the same tricks scammers use in real life.
           </p>
         )}
         <button
@@ -163,7 +163,7 @@ export function SpotTheScamMission({ band, onComplete, onBack }: Props) {
         </button>
       )}
 
-      <p className="text-xs text-center text-[var(--ink-muted)]">Practice money only — not financial advice</p>
+      <p className="text-xs text-center text-[var(--ink-muted)]">Practice money only - not financial advice</p>
     </div>
   );
 }

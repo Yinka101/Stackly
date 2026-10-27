@@ -1,5 +1,5 @@
 /**
- * AgentCoach — Agentic commerce interface.
+ * AgentCoach - Agentic commerce interface.
  *
  * Learner types a goal → agent runs → shows "Coach's plan" timeline.
  * Every step is labelled in plain English; Builders/Investors also see
@@ -52,7 +52,7 @@ const STARTERS: Record<string, string[]> = {
   ],
   builders: [
     'Help me start a small business.',
-    'I want to try investing — where do I start?',
+    'I want to try investing - where do I start?',
     'What kit should I get to learn faster?',
   ],
   investors: [
@@ -189,7 +189,7 @@ export default function AgentCoach() {
         const data = await res.json() as PastPlan[];
         setPastPlans(data);
       }
-    } catch { /* offline — ignore */ }
+    } catch { /* offline - ignore */ }
   }
 
   async function runAgent() {
@@ -241,7 +241,7 @@ export default function AgentCoach() {
         </div>
         <div>
           <h1 className="font-display font-bold text-lg text-ink">Coach Agent</h1>
-          <p className="text-xs text-ink/50">Tell me your goal — I'll build a plan and ask your parent.</p>
+          <p className="text-xs text-ink/50">Tell me your goal - I'll build a plan and ask your parent.</p>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 /**
- * Stackly mascot — a little seedling with three moods.
+ * Stackly mascot - a little seedling with three moods.
  * Pure inline SVG, no external dependencies.
  */
 export type SeedlingMood = 'happy' | 'thinking' | 'celebrating';

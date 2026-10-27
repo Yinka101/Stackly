@@ -36,7 +36,7 @@ export default function WhatIfCalc() {
     <div className="bg-[var(--color-surface)] rounded-2xl p-5 border border-[var(--color-border)]">
       <h3 className="font-display font-bold text-base mb-1">What-if calculator</h3>
       <p className="text-xs text-[var(--color-ink-muted)] mb-4">
-        See how compound growth works over time. This is an example only — not a promise or prediction.
+        See how compound growth works over time. This is an example only - not a promise or prediction.
       </p>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
@@ -104,7 +104,7 @@ export default function WhatIfCalc() {
       </div>
 
       <p className="text-xs text-[var(--color-ink-muted)] mt-3 text-center">
-        Example only — not a promise or prediction. Past returns don't guarantee future results.
+        Example only - not a promise or prediction. Past returns don't guarantee future results.
       </p>
     </div>
   );

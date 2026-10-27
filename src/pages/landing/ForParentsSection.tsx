@@ -5,12 +5,12 @@ const ITEMS = [
   {
     icon: '✅',
     title: 'You approve every payment',
-    body: 'Any real PayPal transaction goes through your account. Your child learns by watching and helping — never by entering card details themselves.',
+    body: 'Any real PayPal transaction goes through your account. Your child learns by watching and helping - never by entering card details themselves.',
   },
   {
     icon: '🎭',
     title: 'Practice money, not real money',
-    body: 'The portfolio runs on Practice Dollars. Your child can "lose" their whole portfolio and nothing actually happens — except they learn a lesson.',
+    body: 'The portfolio runs on Practice Dollars. Your child can "lose" their whole portfolio and nothing actually happens - except they learn a lesson.',
   },
   {
     icon: '🔒',
@@ -68,7 +68,7 @@ export default function ForParentsSection() {
             Designed for your peace of mind
           </h2>
           <p className="text-[var(--color-ink-muted)] max-w-lg mx-auto">
-            We built Stackly to give kids a safe place to make financial mistakes. Here's every safety decision we made — and why.
+            We built Stackly to give kids a safe place to make financial mistakes. Here's every safety decision we made - and why.
           </p>
         </div>
 

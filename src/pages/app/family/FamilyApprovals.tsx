@@ -114,7 +114,7 @@ export default function FamilyApprovals() {
                   <div>
                     <p className="font-semibold text-ink">{row.learnerNickname}</p>
                     <p className="text-sm text-ink/60">
-                      Wants the <strong>{KIT_NAMES[row.kitId] ?? row.kitId}</strong> —
+                      Wants the <strong>{KIT_NAMES[row.kitId] ?? row.kitId}</strong> -
                       ${row.amountUsd.toFixed(2)} real · ${row.practiceDollarsAwarded} Practice
                     </p>
                     <p className="text-xs text-ink/40 mt-0.5">

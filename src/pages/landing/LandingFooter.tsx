@@ -30,7 +30,7 @@ export default function LandingFooter() {
         {/* Disclaimer */}
         <div className="bg-white/5 rounded-[var(--radius-xl)] p-5 mb-6 border border-white/10">
           <p className="text-sm text-white/70 leading-relaxed">
-            <strong className="text-white">Educational disclaimer:</strong> Stackly is an educational tool only. Nothing on this site, in the app, or from the AI coach is financial advice. All portfolio activity uses Practice Dollars — fictional currency with no real monetary value. Past example returns are for illustration only and are not a prediction of future results. Any real PayPal transactions are initiated and approved solely by adults. Stackly is not affiliated with PayPal, Inc. or any brokerage.
+            <strong className="text-white">Educational disclaimer:</strong> Stackly is an educational tool only. Nothing on this site, in the app, or from the AI coach is financial advice. All portfolio activity uses Practice Dollars - fictional currency with no real monetary value. Past example returns are for illustration only and are not a prediction of future results. Any real PayPal transactions are initiated and approved solely by adults. Stackly is not affiliated with PayPal, Inc. or any brokerage.
           </p>
         </div>
 

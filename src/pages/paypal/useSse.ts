@@ -25,12 +25,12 @@ export function useSse(orderId: string | null) {
         const data = JSON.parse(e.data as string) as Omit<SseEvent, 'ts'>;
         setEvents(prev => [...prev, { ...data, ts: Date.now() }]);
       } catch {
-        // heartbeat or malformed — ignore
+        // heartbeat or malformed - ignore
       }
     };
 
     es.onerror = () => {
-      // Connection dropped — stop reconnecting, show last state
+      // Connection dropped - stop reconnecting, show last state
       es.close();
     };
 

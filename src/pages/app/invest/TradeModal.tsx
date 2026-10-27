@@ -65,7 +65,7 @@ export default function TradeModal({ ticker, name, lastClose, side, ownedShares 
         </p>
 
         <p className="text-xs bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-3 py-2 mb-4">
-          🎓 Practice money only — not a real trade.
+          🎓 Practice money only - not a real trade.
         </p>
 
         {/* Amount toggle (buy only) */}

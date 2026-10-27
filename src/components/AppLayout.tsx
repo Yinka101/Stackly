@@ -33,7 +33,7 @@ export default function AppLayout() {
 
   return (
     <div className="flex min-h-screen bg-canvas">
-      {/* Skip to content — visible on focus for keyboard users */}
+      {/* Skip to content - visible on focus for keyboard users */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999]

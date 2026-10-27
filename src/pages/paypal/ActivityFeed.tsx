@@ -1,5 +1,5 @@
 /**
- * ActivityFeed — shows completed PayPal orders with receipts.
+ * ActivityFeed - shows completed PayPal orders with receipts.
  */
 import { useState, useEffect } from 'react';
 import { request } from '@/utils/api';
@@ -32,7 +32,7 @@ export function ActivityFeed() {
     return (
       <div className="card text-center flex flex-col gap-2 py-8">
         <span className="text-3xl">🧾</span>
-        <p className="text-[var(--ink-muted)]">No activity yet — complete Mission 3 to see your first receipt here.</p>
+        <p className="text-[var(--ink-muted)]">No activity yet - complete Mission 3 to see your first receipt here.</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function ActivityFeed() {
           <div className="flex-1">
             <p className="font-semibold text-sm text-[var(--ink)]">{o.kitName}</p>
             <p className="text-xs text-[var(--ink-muted)]">
-              {o.completedAt ? new Date(o.completedAt).toLocaleDateString() : '—'}
+              {o.completedAt ? new Date(o.completedAt).toLocaleDateString() : '-'}
             </p>
           </div>
           <div className="text-right">

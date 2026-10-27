@@ -28,7 +28,7 @@ interface SessionCtx {
   loading: boolean;
   refresh: () => Promise<void>;
   logout: () => Promise<void>;
-  /** Set user immediately from a login response — no second network call. */
+  /** Set user immediately from a login response - no second network call. */
   setUserFromLogin: (data: { role: 'parent' | 'learner'; familyId: string; token: string }) => void;
 }
 
@@ -53,7 +53,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // 30 s timeout — Render free tier cold-starts can take ~25 s.
+      // 30 s timeout - Render free tier cold-starts can take ~25 s.
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
@@ -76,7 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         email:           actor.email            as string | undefined,
       });
     } catch (err) {
-      // Only clear the token on a definitive 401 — NOT on a timeout or network
+      // Only clear the token on a definitive 401 - NOT on a timeout or network
       // error. A slow cold-start should not log the user out.
       const isUnauthorized =
         err instanceof Error &&

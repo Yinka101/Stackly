@@ -17,7 +17,7 @@ export default function GrowthSlider() {
     <div className="bg-[var(--color-surface)] rounded-[var(--radius-2xl)] border border-[var(--color-border)] p-5 shadow-sm w-full max-w-sm mx-auto">
       {/* Disclaimer */}
       <p className="text-xs text-[var(--color-ink-muted)] mb-3 text-center">
-        Example only — not a promise of returns
+        Example only - not a promise of returns
       </p>
 
       {/* Bar chart */}

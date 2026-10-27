@@ -72,7 +72,7 @@ export default function AddLearner() {
     <div className="min-h-screen bg-canvas flex flex-col items-center p-6 pt-12">
       <div className="w-full max-w-md">
         <h1 className="font-display text-2xl font-bold text-ink mb-1">Add a learner</h1>
-        <p className="text-ink/60 mb-6">No email needed — just a nickname, age group and a 4-digit PIN.</p>
+        <p className="text-ink/60 mb-6">No email needed - just a nickname, age group and a 4-digit PIN.</p>
 
         <form onSubmit={(e) => { void submit(e); }} className="flex flex-col gap-6">
           {/* Nickname */}

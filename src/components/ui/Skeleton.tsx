@@ -1,4 +1,4 @@
-/** Skeleton shimmer — respects prefers-reduced-motion. */
+/** Skeleton shimmer - respects prefers-reduced-motion. */
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
     <div

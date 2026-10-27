@@ -1,5 +1,5 @@
 /**
- * usePayPalOrder — manages the full Mission 3 lifecycle:
+ * usePayPalOrder - manages the full Mission 3 lifecycle:
  * create → await parent approval → open popup → poll → capture → receipt
  *
  * Error states handled: cancel, decline, network failure, closed popup.
@@ -85,7 +85,7 @@ export function usePayPalOrder() {
       const closed = !popupRef.current || popupRef.current.closed;
       if (closed) {
         clearPoll();
-        // Popup closed — check order status
+        // Popup closed - check order status
         try {
           const data = await request<{ status: string }>(`/paypal/orders/${orderId}`);
           if (data.status === 'completed') {
@@ -107,13 +107,13 @@ export function usePayPalOrder() {
       try {
         const href = popupRef.current?.location?.href ?? '';
         if (href.includes('token=') || href.includes('PayerID=')) {
-          // Buyer approved in PayPal — close popup and capture
+          // Buyer approved in PayPal - close popup and capture
           popupRef.current?.close();
           clearPoll();
           await capture();
         }
       } catch {
-        // Cross-origin frame — can't read location, keep polling
+        // Cross-origin frame - can't read location, keep polling
       }
     }, 1000);
   }, [approveLink, orderId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -147,7 +147,7 @@ export function usePayPalOrder() {
       }
     } catch (e) {
       setStage('error');
-      setError((e as Error).message ?? 'Network error. Your payment may not have gone through — check activity before trying again.');
+      setError((e as Error).message ?? 'Network error. Your payment may not have gone through - check activity before trying again.');
     }
   }, [orderId]);
 
