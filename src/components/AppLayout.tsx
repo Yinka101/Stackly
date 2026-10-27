@@ -46,11 +46,15 @@ export default function AppLayout() {
       {/* ── Sidebar (desktop ≥ 768px) ─────────────────────────────────────── */}
       <aside className="hidden md:flex flex-col w-60 shrink-0 bg-surface border-r border-ink/8 px-3 py-6"
              aria-label="Main navigation">
-        {/* Logo */}
-        <div className="flex items-center gap-2 px-3 mb-8" aria-hidden="true">
+        {/* Logo - links back to landing page */}
+        <a
+          href="https://stackly-web.onrender.com"
+          className="flex items-center gap-2 px-3 mb-8 hover:opacity-80 transition-opacity"
+          aria-label="Stackly home"
+        >
           <span className="text-2xl">🌱</span>
           <span className="font-display font-bold text-xl text-ink">Stackly</span>
-        </div>
+        </a>
 
         <nav aria-label="App sections" className="flex flex-col gap-1 flex-1">
           {items.map((item) => (
@@ -102,10 +106,14 @@ export default function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-ink/8">
-          <div className="flex items-center gap-2" aria-hidden="true">
+          <a
+            href="https://stackly-web.onrender.com"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            aria-label="Stackly home"
+          >
             <span className="text-xl">🌱</span>
             <span className="font-display font-bold text-ink">Stackly</span>
-          </div>
+          </a>
           <button
             onClick={handleLogout}
             className="text-ink/50 text-sm hover:text-ink min-h-[44px] min-w-[44px]
