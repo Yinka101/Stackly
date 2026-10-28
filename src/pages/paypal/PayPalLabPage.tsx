@@ -87,27 +87,23 @@ export function PayPalLabPage() {
   // ── Active mission views ──────────────────────────────────────────────────
   if (active === 1) {
     return (
-      <div className="p-4">
-        <GuidedSimMission
-          steps={sendMoneySteps}
-          band={band}
-          onComplete={() => handleComplete(1)}
-          onBack={() => setActive(null)}
-        />
-      </div>
+      <GuidedSimMission
+        steps={sendMoneySteps}
+        band={band}
+        onComplete={() => handleComplete(1)}
+        onBack={() => setActive(null)}
+      />
     );
   }
 
   if (active === 2) {
     return (
-      <div className="p-4">
-        <GuidedSimMission
-          steps={requestMoneySteps}
-          band={band}
-          onComplete={() => handleComplete(2)}
-          onBack={() => setActive(null)}
-        />
-      </div>
+      <GuidedSimMission
+        steps={requestMoneySteps}
+        band={band}
+        onComplete={() => handleComplete(2)}
+        onBack={() => setActive(null)}
+      />
     );
   }
 

@@ -48,7 +48,7 @@ export function GuidedSimMission({ steps, band, onComplete, onBack }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-4 max-w-lg mx-auto">
+    <div className="flex flex-col gap-4 max-w-lg mx-auto px-4 py-4 pb-8">
       {/* Progress bar */}
       <div className="flex items-center gap-3">
         <button onClick={onBack} className="text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]" aria-label="Back">
