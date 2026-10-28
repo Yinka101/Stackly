@@ -10,11 +10,6 @@ services:
       $HOME/.bun/bin/bun install &&
       VITE_API_URL="" VITE_DEMO_MODE=true $HOME/.bun/bin/bunx vite build
     startCommand: "$HOME/.bun/bin/bun server/index.ts"
-    # Persistent disk — keeps stackly.db alive across deploys ($1/month on Render)
-    disk:
-      name: stackly-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
@@ -22,8 +17,6 @@ services:
         value: sandbox
       - key: PAYPAL_BASE_URL
         value: https://api-m.sandbox.paypal.com
-      - key: DATABASE_URL
-        value: /data/stackly.db
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET
@@ -34,3 +27,7 @@ services:
         generateValue: true
       - key: DEMO_MODE
         value: "true"
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false

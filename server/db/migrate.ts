@@ -1,23 +1,61 @@
 /**
- * Run once at startup — creates all tables then seeds a demo family
- * if none exist yet. Uses raw SQL via bun:sqlite.
+ * migrate.ts — runs at startup.
+ * Creates all tables, seeds demo family, and applies idempotent column fixes.
+ * Works with both Turso (libsql) in production and bun:sqlite in dev.
  */
-import { Database } from 'bun:sqlite';
 import { createHash } from 'node:crypto';
 
-const dbPath = process.env.DATABASE_URL ?? './stackly.db';
-const sqlite = new Database(dbPath, { create: true });
-sqlite.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+// ── Pick driver ───────────────────────────────────────────────────────────────
+const tursoUrl   = process.env.TURSO_DATABASE_URL;
+const tursoToken = process.env.TURSO_AUTH_TOKEN;
 
-// ── DDL ──────────────────────────────────────────────────────────────────────
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS families (
+type SimpleClient = {
+  execute: (sql: string | { sql: string; args: unknown[] }) => Promise<{ rows: Record<string, unknown>[] }>;
+  close?: () => void;
+};
+
+let client: SimpleClient;
+
+if (tursoUrl && tursoToken) {
+  const { createClient } = await import('@libsql/client');
+  const c = createClient({ url: tursoUrl, authToken: tursoToken });
+  client = {
+    execute: async (q) => {
+      if (typeof q === 'string') return c.execute(q) as Promise<{ rows: Record<string, unknown>[] }>;
+      return c.execute(q) as Promise<{ rows: Record<string, unknown>[] }>;
+    },
+  };
+  console.log('[migrate] Using Turso');
+} else {
+  const { Database } = await import('bun:sqlite');
+  const dbPath = process.env.DATABASE_URL ?? './stackly.db';
+  const sqlite = new Database(dbPath, { create: true });
+  sqlite.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+  client = {
+    execute: async (q) => {
+      if (typeof q === 'string') {
+        sqlite.exec(q);
+        return { rows: [] };
+      }
+      // bun:sqlite positional args
+      const stmt = sqlite.prepare(q.sql);
+      const rows = stmt.all(...(q.args as unknown[])) as Record<string, unknown>[];
+      return { rows };
+    },
+    close: () => sqlite.close(),
+  };
+  console.log('[migrate] Using local SQLite:', dbPath);
+}
+
+// ── DDL ───────────────────────────────────────────────────────────────────────
+// Split into individual statements — libsql does not support multi-statement exec
+const DDL = [
+  `CREATE TABLE IF NOT EXISTS families (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS users (
+  )`,
+  `CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     family_id TEXT NOT NULL REFERENCES families(id),
     email TEXT NOT NULL UNIQUE,
@@ -25,9 +63,8 @@ sqlite.exec(`
     consent_given INTEGER NOT NULL DEFAULT 0,
     consent_at INTEGER,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS learners (
+  )`,
+  `CREATE TABLE IF NOT EXISTS learners (
     id TEXT PRIMARY KEY,
     family_id TEXT NOT NULL REFERENCES families(id),
     nickname TEXT NOT NULL,
@@ -39,26 +76,23 @@ sqlite.exec(`
     streak_days INTEGER NOT NULL DEFAULT 0,
     last_active_date TEXT,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS sessions (
+  )`,
+  `CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,
     role TEXT NOT NULL,
     owner_id TEXT NOT NULL,
     family_id TEXT NOT NULL,
     expires_at INTEGER NOT NULL,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS holdings (
+  )`,
+  `CREATE TABLE IF NOT EXISTS holdings (
     id TEXT PRIMARY KEY,
     learner_id TEXT NOT NULL REFERENCES learners(id),
     ticker TEXT NOT NULL,
     shares REAL NOT NULL DEFAULT 0,
     avg_cost_cents INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS trades (
+  )`,
+  `CREATE TABLE IF NOT EXISTS trades (
     id TEXT PRIMARY KEY,
     learner_id TEXT NOT NULL REFERENCES learners(id),
     ticker TEXT NOT NULL,
@@ -68,9 +102,8 @@ sqlite.exec(`
     reflection TEXT,
     replay_date TEXT,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS replay_sessions (
+  )`,
+  `CREATE TABLE IF NOT EXISTS replay_sessions (
     id TEXT PRIMARY KEY,
     learner_id TEXT NOT NULL REFERENCES learners(id),
     start_date TEXT NOT NULL,
@@ -78,9 +111,8 @@ sqlite.exec(`
     cash_cents INTEGER NOT NULL DEFAULT 100000,
     active INTEGER NOT NULL DEFAULT 1,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS paypal_orders (
+  )`,
+  `CREATE TABLE IF NOT EXISTS paypal_orders (
     id TEXT PRIMARY KEY,
     request_id TEXT NOT NULL UNIQUE,
     kit_id TEXT NOT NULL,
@@ -93,34 +125,30 @@ sqlite.exec(`
     status TEXT NOT NULL DEFAULT 'created',
     created_at INTEGER NOT NULL,
     completed_at INTEGER
-  );
-
-  CREATE TABLE IF NOT EXISTS webhook_events (
+  )`,
+  `CREATE TABLE IF NOT EXISTS webhook_events (
     id TEXT PRIMARY KEY,
     event_type TEXT NOT NULL,
     resource_type TEXT NOT NULL,
     resource_id TEXT NOT NULL,
     verified INTEGER NOT NULL DEFAULT 0,
     processed_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS chat_messages (
+  )`,
+  `CREATE TABLE IF NOT EXISTS chat_messages (
     id TEXT PRIMARY KEY,
     learner_id TEXT NOT NULL REFERENCES learners(id),
     role TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS lesson_progress (
+  )`,
+  `CREATE TABLE IF NOT EXISTS lesson_progress (
     id TEXT PRIMARY KEY,
     learner_id TEXT NOT NULL REFERENCES learners(id),
     lesson_id TEXT NOT NULL,
     completed_at INTEGER NOT NULL,
     xp_earned INTEGER NOT NULL DEFAULT 0
-  );
-
-  CREATE TABLE IF NOT EXISTS agent_plans (
+  )`,
+  `CREATE TABLE IF NOT EXISTS agent_plans (
     id TEXT PRIMARY KEY,
     learner_id TEXT NOT NULL REFERENCES learners(id),
     family_id TEXT NOT NULL,
@@ -132,9 +160,8 @@ sqlite.exec(`
     reasoning TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS agent_audit_log (
+  )`,
+  `CREATE TABLE IF NOT EXISTS agent_audit_log (
     id TEXT PRIMARY KEY,
     plan_id TEXT NOT NULL REFERENCES agent_plans(id),
     learner_id TEXT NOT NULL,
@@ -143,75 +170,28 @@ sqlite.exec(`
     output TEXT NOT NULL DEFAULT '{}',
     duration_ms INTEGER,
     created_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS family_settings (
+  )`,
+  `CREATE TABLE IF NOT EXISTS family_settings (
     family_id TEXT PRIMARY KEY REFERENCES families(id),
     agent_enabled INTEGER NOT NULL DEFAULT 1,
     weekly_cap_cents INTEGER NOT NULL DEFAULT 1000,
     updated_at INTEGER NOT NULL
-  );
-`);
+  )`,
+];
 
-// ── Seed demo family (idempotent — runs on every startup) ────────────────────
-// Uses INSERT OR IGNORE with stable hard-coded IDs so a fresh DB after a
-// Render redeploy always has the demo account, but an existing DB is untouched.
-{
-  const hash = (v: string) => createHash('sha256').update(`stackly:${v}`).digest('hex');
-  const now = Date.now();
-  const today = new Date().toISOString().slice(0, 10);
-
-  // Stable IDs — never change these or existing sessions break
-  const FAMILY_ID  = 'demo-family-0001';
-  const PARENT_ID  = 'demo-parent-0001';
-  const SAM_ID     = 'demo-learner-sam';
-  const BEN_ID     = 'demo-learner-ben';
-  const IVY_ID     = 'demo-learner-ivy';
-
-  sqlite.run(
-    'INSERT OR IGNORE INTO families (id, name, created_at) VALUES (?, ?, ?)',
-    [FAMILY_ID, 'Demo Family', now],
-  );
-
-  sqlite.run(
-    `INSERT OR IGNORE INTO users
-       (id, family_id, email, password_hash, consent_given, consent_at, created_at)
-     VALUES (?, ?, ?, ?, 1, ?, ?)`,
-    [PARENT_ID, FAMILY_ID, 'demo@stackly.app', hash('demo1234'), now, now],
-  );
-
-  const seedLearners = [
-    { id: SAM_ID, nickname: 'Sprout Sam',   band: 'sprouts',   avatar: 'seedling', pin: '1111', xp: 120,  streak: 3,  pd: 950  },
-    { id: BEN_ID, nickname: 'Builder Ben',  band: 'builders',  avatar: 'rocket',   pin: '2222', xp: 340,  streak: 7,  pd: 1250 },
-    { id: IVY_ID, nickname: 'Investor Ivy', band: 'investors', avatar: 'chart',    pin: '3333', xp: 780,  streak: 14, pd: 2100 },
-  ];
-
-  for (const l of seedLearners) {
-    sqlite.run(
-      `INSERT OR IGNORE INTO learners
-         (id, family_id, nickname, band, avatar, pin_hash,
-          practice_dollars, xp, streak_days, last_active_date, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [l.id, FAMILY_ID, l.nickname, l.band, l.avatar,
-       hash(l.pin), l.pd, l.xp, l.streak, today, now],
-    );
-  }
-
-  // Fix any existing DB that still has the old email
-  sqlite.run(`UPDATE users SET email = 'demo@stackly.app' WHERE id = ? AND email = 'parent@demo.stackly'`,
-    [PARENT_ID]);
-
-  console.log('[db] Demo family ready — demo@stackly.app / demo1234');
-  console.log('[db]   Sprout Sam PIN 1111 | Builder Ben PIN 2222 | Investor Ivy PIN 3333');
+for (const sql of DDL) {
+  await client.execute(sql);
 }
 
-// ── Idempotent column additions / renames ────────────────────────────────────
-// SQLite doesn't support ALTER TABLE RENAME COLUMN in older versions.
-// Pattern: add the new column, copy data, leave old column in place (harmless).
-const addCol = (sql: string) => { try { sqlite.exec(sql); } catch { /* already exists */ } };
+// ── Idempotent column additions ───────────────────────────────────────────────
+const addCol = async (sql: string) => {
+  try { await client.execute(sql); } catch { /* column already exists */ }
+};
+await addCol(`ALTER TABLE family_settings ADD COLUMN reading_level_override TEXT`);
+await addCol(`ALTER TABLE trades ADD COLUMN reflection TEXT`);
+await addCol(`ALTER TABLE trades ADD COLUMN replay_date TEXT`);
 
-// Schema migration: profile_id -> learner_id across holdings, trades, and related tables
-// Add learner_id if missing, then backfill from profile_id
+// ── Schema migration: profile_id -> learner_id (old DBs only) ────────────────
 const renameCols: Array<{ table: string; from: string; to: string }> = [
   { table: 'holdings',        from: 'profile_id', to: 'learner_id' },
   { table: 'trades',          from: 'profile_id', to: 'learner_id' },
@@ -219,25 +199,46 @@ const renameCols: Array<{ table: string; from: string; to: string }> = [
   { table: 'lesson_progress', from: 'profile_id', to: 'learner_id' },
   { table: 'chat_messages',   from: 'profile_id', to: 'learner_id' },
 ];
-
 for (const { table, from, to } of renameCols) {
-  // Check if old column exists
-  const cols = sqlite.query(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
-  const hasOld = cols.some(c => c.name === from);
-  const hasNew = cols.some(c => c.name === to);
+  const { rows } = await client.execute(`PRAGMA table_info(${table})`);
+  const hasOld = rows.some((r) => r['name'] === from);
+  const hasNew = rows.some((r) => r['name'] === to);
   if (hasOld && !hasNew) {
-    // Add new column and copy data
-    try { sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${to} TEXT NOT NULL DEFAULT ''`); } catch { /* ok */ }
-    sqlite.exec(`UPDATE ${table} SET ${to} = ${from} WHERE ${to} = '' OR ${to} IS NULL`);
+    await addCol(`ALTER TABLE ${table} ADD COLUMN ${to} TEXT NOT NULL DEFAULT ''`);
+    await client.execute(`UPDATE ${table} SET ${to} = ${from} WHERE ${to} = '' OR ${to} IS NULL`);
     console.log(`[db] Migrated ${table}.${from} -> ${to}`);
   }
 }
 
-addCol(`ALTER TABLE family_settings ADD COLUMN reading_level_override TEXT`);
+// ── Seed demo family (idempotent) ─────────────────────────────────────────────
+{
+  const hash = (v: string) => createHash('sha256').update(`stackly:${v}`).digest('hex');
+  const now = Date.now();
+  const today = new Date().toISOString().slice(0, 10);
 
-// Add reflection and replay_date to trades if missing (added in a later schema version)
-addCol(`ALTER TABLE trades ADD COLUMN reflection TEXT`);
-addCol(`ALTER TABLE trades ADD COLUMN replay_date TEXT`);
+  const FAMILY_ID = 'demo-family-0001';
+  const PARENT_ID = 'demo-parent-0001';
+  const SAM_ID    = 'demo-learner-sam';
+  const BEN_ID    = 'demo-learner-ben';
+  const IVY_ID    = 'demo-learner-ivy';
 
-console.log('[db] Tables ready at', dbPath);
-sqlite.close();
+  await client.execute({ sql: 'INSERT OR IGNORE INTO families (id, name, created_at) VALUES (?, ?, ?)', args: [FAMILY_ID, 'Demo Family', now] });
+  await client.execute({ sql: `INSERT OR IGNORE INTO users (id, family_id, email, password_hash, consent_given, consent_at, created_at) VALUES (?, ?, ?, ?, 1, ?, ?)`, args: [PARENT_ID, FAMILY_ID, 'demo@stackly.app', hash('demo1234'), now, now] });
+
+  const seedLearners = [
+    { id: SAM_ID, nickname: 'Sprout Sam',   band: 'sprouts',   avatar: 'seedling', pin: '1111', xp: 120, streak: 3,  pd: 950  },
+    { id: BEN_ID, nickname: 'Builder Ben',  band: 'builders',  avatar: 'rocket',   pin: '2222', xp: 340, streak: 7,  pd: 1250 },
+    { id: IVY_ID, nickname: 'Investor Ivy', band: 'investors', avatar: 'chart',    pin: '3333', xp: 780, streak: 14, pd: 2100 },
+  ];
+  for (const l of seedLearners) {
+    await client.execute({ sql: `INSERT OR IGNORE INTO learners (id, family_id, nickname, band, avatar, pin_hash, practice_dollars, xp, streak_days, last_active_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, args: [l.id, FAMILY_ID, l.nickname, l.band, l.avatar, hash(l.pin), l.pd, l.xp, l.streak, today, now] });
+  }
+  // Fix old email if present
+  await client.execute({ sql: `UPDATE users SET email = 'demo@stackly.app' WHERE id = ? AND email = 'parent@demo.stackly'`, args: [PARENT_ID] });
+
+  console.log('[db] Demo family ready — demo@stackly.app / demo1234');
+  console.log('[db]   Sprout Sam PIN 1111 | Builder Ben PIN 2222 | Investor Ivy PIN 3333');
+}
+
+console.log('[db] Tables ready');
+client.close?.();
