@@ -43,7 +43,7 @@ router.post('/run', requireLearner, async (c) => {
 
   // Moderate input
   const mod = moderateInput(userMessage);
-  if (!mod.ok) return c.json({ error: mod.reason }, 400);
+  if (!mod.safe) return c.json({ error: (mod as { reason?: string }).reason ?? 'Message not allowed' }, 400);
 
   // Need a parentId — get from the learner's family
   const [learnerRow] = await db.select().from(learners).where(eq(learners.id, learnerId)).limit(1);
