@@ -20,7 +20,7 @@
 import { Hono } from 'hono';
 import { db } from '../db/index';
 import { learners, users, paypalOrders, webhookEvents } from '../db/schema';
-import { requireParent } from '../middleware/session';
+import { requireParent, requireAuth } from '../middleware/session';
 import { getKit, KITS } from '../data/kits';
 import {
   createOrder,
@@ -42,19 +42,41 @@ router.get('/kits', (c) => {
 });
 
 // ── POST /paypal/orders — create a new order ─────────────────────────────────
-router.post('/orders', requireParent, async (c) => {
+router.post('/orders', requireAuth, async (c) => {
   const session = c.get('session')!;
-  const body = await c.req.json<{ kitId: string; learnerId: string }>();
+  const body = await c.req.json<{ kitId: string; learnerId?: string }>();
 
   const kit = getKit(body.kitId);
   if (!kit) return c.json({ error: 'Unknown kit' }, 400);
 
-  // Verify learner belongs to parent's family
-  const [learner] = await db
+  // Resolve learnerId and verify family membership
+  let learnerId: string;
+  let learnerFamilyId: string;
+
+  if (session.role === 'learner') {
+    // Learner is creating their own order - use their own id
+    learnerId = session.ownerId;
+    const [lr] = await db.select().from(learners).where(eq(learners.id, learnerId));
+    if (!lr) return c.json({ error: 'Learner not found' }, 404);
+    learnerFamilyId = lr.familyId;
+  } else {
+    // Parent creating on behalf of a learner
+    if (!body.learnerId) return c.json({ error: 'learnerId required' }, 400);
+    learnerId = body.learnerId;
+    const [lr] = await db
+      .select()
+      .from(learners)
+      .where(and(eq(learners.id, learnerId), eq(learners.familyId, session.familyId)));
+    if (!lr) return c.json({ error: 'Learner not found' }, 404);
+    learnerFamilyId = lr.familyId;
+  }
+
+  // Look up a parent in this family to associate with the order
+  const [parentUser] = await db
     .select()
-    .from(learners)
-    .where(and(eq(learners.id, body.learnerId), eq(learners.familyId, session.familyId)));
-  if (!learner) return c.json({ error: 'Learner not found' }, 404);
+    .from(users)
+    .where(eq(users.familyId, learnerFamilyId));
+  const parentId = parentUser?.id ?? null;
 
   const requestId = nanoid(); // idempotency key
 
@@ -73,8 +95,8 @@ router.post('/orders', requireParent, async (c) => {
     id: ppOrder.id,
     requestId,
     kitId: kit.id,
-    learnerId: body.learnerId,
-    parentId: session.ownerId,
+    learnerId,
+    parentId,
     amountUsd: parseFloat(kit.priceUsd),
     practiceDollarsAwarded: kit.practiceDollarsAwarded,
     xpAwarded: kit.xpAwarded,
@@ -82,7 +104,7 @@ router.post('/orders', requireParent, async (c) => {
     createdAt: new Date(),
   });
 
-  console.log('[paypal] order created id=%s kit=%s learner=%s', ppOrder.id, kit.id, body.learnerId);
+  console.log('[paypal] order created id=%s kit=%s learner=%s', ppOrder.id, kit.id, learnerId);
 
   // Emit SSE (no clients yet at this point, but emit anyway for any early subscribers)
   emitOrderEvent(ppOrder.id, {
