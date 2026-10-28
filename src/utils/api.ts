@@ -1,10 +1,16 @@
-/** Thin fetch wrapper. All calls go through the Vite proxy at /api → :3001 */
-
-const BASE = '/api';
+/** Thin fetch wrapper. Resolves base URL from config.json at runtime. */
+import { getApiBase, loadConfig, tokenStore } from '@/lib/api';
 
 export async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const resp = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+  await loadConfig();
+  const base = getApiBase();
+  const token = tokenStore.get();
+  const resp = await fetch(`${base}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
     ...options,
   });
   if (!resp.ok) {

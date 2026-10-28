@@ -66,7 +66,8 @@ export function SpotTheScamMission({ band, onComplete, onBack }: Props) {
         )}
         <button
           onClick={onComplete}
-          className="py-3 rounded-xl bg-[var(--primary)] text-white font-bold mt-2"
+          className="py-3 rounded-xl font-bold mt-2"
+          style={{ backgroundColor: '#2d7a4f', color: '#ffffff' }}
         >
           Finish mission →
         </button>
@@ -80,8 +81,8 @@ export function SpotTheScamMission({ band, onComplete, onBack }: Props) {
         <button onClick={onBack} className="text-sm text-[var(--ink-muted)] hover:text-[var(--ink)]">← Back</button>
         <div className="flex-1 h-2 bg-[var(--surface-2)] rounded-full overflow-hidden">
           <div
-            className="h-full bg-[var(--primary)] rounded-full transition-all duration-500"
-            style={{ width: `${Math.round(((idx) / scamExamples.length) * 100)}%` }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${Math.round(((idx) / scamExamples.length) * 100)}%`, backgroundColor: '#2d7a4f' }}
           />
         </div>
         <span className="text-xs text-[var(--ink-muted)]">{idx + 1}/{scamExamples.length}</span>
@@ -157,7 +158,8 @@ export function SpotTheScamMission({ band, onComplete, onBack }: Props) {
       {revealed && (
         <button
           onClick={handleNext}
-          className="py-3 rounded-xl bg-[var(--primary)] text-white font-bold"
+          className="py-3 rounded-xl font-bold"
+          style={{ backgroundColor: '#2d7a4f', color: '#ffffff' }}
         >
           {idx === scamExamples.length - 1 ? 'See results →' : 'Next →'}
         </button>
