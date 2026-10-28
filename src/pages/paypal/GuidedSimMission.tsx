@@ -126,23 +126,24 @@ export function GuidedSimMission({ steps, band, onComplete, onBack }: Props) {
       </div>
 
       {/* Navigation */}
-      <div className="flex gap-3">
-        {idx > 0 && (
-          <button
-            onClick={() => setIdx(i => i - 1)}
-            className="flex-1 py-3 rounded-xl border-2 border-[var(--surface-2)] text-[var(--ink-muted)] font-semibold"
-          >
-            Back
-          </button>
-        )}
+      <div className="flex flex-col gap-3">
         <button
           onClick={handleNext}
           disabled={!canAdvance()}
-          className="flex-1 py-3 rounded-xl font-bold transition-opacity disabled:opacity-40"
+          className="w-full py-3 rounded-xl font-bold transition-opacity disabled:opacity-40"
           style={{ backgroundColor: '#2d7a4f', color: '#ffffff' }}
         >
           {isLast ? '🎉 Complete' : step.interaction === 'tap' ? 'Tap to continue →' : 'Next →'}
         </button>
+        {idx > 0 && (
+          <button
+            onClick={() => setIdx(i => i - 1)}
+            className="w-full py-3 rounded-xl border-2 text-sm font-semibold"
+            style={{ borderColor: '#e0e0e0', color: '#666' }}
+          >
+            Back
+          </button>
+        )}
       </div>
 
       {/* Disclaimer */}
