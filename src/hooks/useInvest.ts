@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getApiBase, tokenStore } from '@/lib/api';
 
 export interface PnLRow {
   ticker: string;
@@ -41,11 +42,21 @@ export interface TickerInfo {
   disclaimer: string;
 }
 
-const BASE = '/api/invest';
+function authHeaders(): Record<string, string> {
+  const token = tokenStore.get();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  return fetch(`${BASE}${path}`, { credentials: 'include', ...opts })
-    .then(r => r.json() as Promise<T>);
+  const base = getApiBase().replace(/\/api$/, '');
+  return fetch(`${base}/invest${path}`, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', ...authHeaders(), ...opts?.headers },
+  }).then(async r => {
+    const data = await r.json() as T;
+    if (!r.ok) throw new Error((data as { error?: string }).error ?? `HTTP ${r.status}`);
+    return data;
+  });
 }
 
 export function usePortfolio() {
@@ -115,13 +126,13 @@ export async function executeTrade(body: {
   reflection?: string;
   replayDate?: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  const res = await fetch(`${BASE}/trade`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json() as { ok?: boolean; error?: string };
-  if (!res.ok) return { ok: false, error: data.error ?? 'Trade failed' };
-  return { ok: true };
+  try {
+    await apiFetch<{ ok: boolean }>('/trade', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Trade failed' };
+  }
 }
