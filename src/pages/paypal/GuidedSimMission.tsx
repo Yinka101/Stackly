@@ -56,8 +56,8 @@ export function GuidedSimMission({ steps, band, onComplete, onBack }: Props) {
         </button>
         <div className="flex-1 h-2 bg-[var(--surface-2)] rounded-full overflow-hidden">
           <div
-            className="h-full bg-[var(--primary)] rounded-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${progress}%`, backgroundColor: '#2d7a4f' }}
           />
         </div>
         <span className="text-xs text-[var(--ink-muted)] tabular-nums">{idx + 1}/{steps.length}</span>
@@ -110,7 +110,8 @@ export function GuidedSimMission({ steps, band, onComplete, onBack }: Props) {
         {/* Coach tip toggle */}
         <button
           onClick={() => setShowTip(t => !t)}
-          className="flex items-center gap-2 text-sm text-[var(--primary)] font-medium"
+          className="flex items-center gap-2 text-sm font-medium"
+          style={{ color: '#2d7a4f' }}
           aria-expanded={showTip}
         >
           <span>🌱</span>
@@ -137,7 +138,8 @@ export function GuidedSimMission({ steps, band, onComplete, onBack }: Props) {
         <button
           onClick={handleNext}
           disabled={!canAdvance()}
-          className="flex-1 py-3 rounded-xl bg-[var(--primary)] text-white font-bold disabled:opacity-40 transition-opacity"
+          className="flex-1 py-3 rounded-xl font-bold transition-opacity disabled:opacity-40"
+          style={{ backgroundColor: '#2d7a4f', color: '#ffffff' }}
         >
           {isLast ? '🎉 Complete' : step.interaction === 'tap' ? 'Tap to continue →' : 'Next →'}
         </button>
