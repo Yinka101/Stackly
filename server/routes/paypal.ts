@@ -100,7 +100,7 @@ router.post('/orders', requireAuth, async (c) => {
     amountUsd: parseFloat(kit.priceUsd),
     practiceDollarsAwarded: kit.practiceDollarsAwarded,
     xpAwarded: kit.xpAwarded,
-    status: 'created',
+    status: 'pending_agent',
     createdAt: new Date(),
   });
 
@@ -227,13 +227,13 @@ router.get('/pending', requireParent, async (c) => {
   if (learnerIds.length === 0) return c.json({ orders: [] });
 
   // Get pending orders
-  const { inArray } = await import('drizzle-orm');
+  const { inArray, or } = await import('drizzle-orm');
   const pending = await db
     .select()
     .from(paypalOrders)
     .where(and(
       inArray(paypalOrders.learnerId, learnerIds),
-      eq(paypalOrders.status, 'created'),
+      or(eq(paypalOrders.status, 'pending_agent'), eq(paypalOrders.status, 'created')),
     ));
 
   const orders = pending.map(o => {
@@ -481,7 +481,7 @@ router.post('/orders/:id/approve', requireParent, async (c) => {
 
   if (!order) return c.json({ error: 'Order not found' }, 404);
   if (order.parentId !== session.ownerId) return c.json({ error: 'Forbidden' }, 403);
-  if (order.status !== 'created') return c.json({ error: 'Order already processed' }, 409);
+  if (order.status !== 'created' && order.status !== 'pending_agent') return c.json({ error: 'Order already processed' }, 409);
 
   await db
     .update(paypalOrders)
@@ -514,7 +514,7 @@ router.post('/orders/:id/decline', requireParent, async (c) => {
 
   if (!order) return c.json({ error: 'Order not found' }, 404);
   if (order.parentId !== session.ownerId) return c.json({ error: 'Forbidden' }, 403);
-  if (order.status !== 'created') return c.json({ error: 'Order already processed' }, 409);
+  if (order.status !== 'created' && order.status !== 'pending_agent') return c.json({ error: 'Order already processed' }, 409);
 
   await db
     .update(paypalOrders)

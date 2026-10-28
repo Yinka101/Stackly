@@ -23,6 +23,7 @@ import { eq, and, desc, gte, sql } from 'drizzle-orm';
 import { sessionMiddleware, requireParent } from '../middleware/session.js';
 import { completeText, isConfigured } from '../ai/provider.js';
 import { nanoid } from '../utils/nanoid.js';
+import { emitOrderEvent } from './paypal.js';
 
 const router = new Hono();
 router.use('*', sessionMiddleware);
@@ -198,6 +199,14 @@ router.post('/approvals/:id/approve', async (c) => {
     })
     .where(eq(learners.id, order.paypal_orders.learnerId));
 
+  // Notify the learner's screen via SSE so it auto-advances
+  emitOrderEvent(orderId, {
+    type: 'parent_approved',
+    label: '✅ Parent approved',
+    detail: 'Your parent approved the purchase. Practice dollars awarded!',
+    tech: 'POST /family/approvals/:id/approve',
+  });
+
   return c.json({ ok: true, practiceDollarsAwarded: order.paypal_orders.practiceDollarsAwarded });
 });
 
@@ -240,6 +249,14 @@ router.post('/approvals/:id/decline', async (c) => {
       })
       .where(eq(agentPlans.id, planRows[0].id));
   }
+
+  // Notify learner screen via SSE
+  emitOrderEvent(orderId, {
+    type: 'parent_declined',
+    label: '❌ Parent declined',
+    detail: body.reason ? `Declined: ${body.reason}` : 'Your parent declined this purchase.',
+    tech: 'POST /family/approvals/:id/decline',
+  });
 
   return c.json({ ok: true });
 });
