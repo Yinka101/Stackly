@@ -7,6 +7,7 @@ import QuizCard from './QuizCard';
 import PortfolioReview from './PortfolioReview';
 import AgentCoach from './AgentCoach';
 import EmptyState from '@/components/ui/EmptyState';
+import { renderMarkdown } from '@/utils/markdown';
 
 type Tab = 'chat' | 'agent' | 'quiz' | 'review';
 
@@ -144,13 +145,17 @@ export default function CoachPage() {
                       : 'bg-surface border border-ink/8 text-ink rounded-tl-sm'
                   }`}
                 >
-                  {msg.content || (msg.streaming ? (
+                  {msg.streaming && !msg.content ? (
                     <span aria-label="Penny is thinking" className="flex gap-1 items-center h-5">
                       <span aria-hidden className="w-1.5 h-1.5 bg-ink/30 rounded-full animate-bounce [animation-delay:0ms]" />
                       <span aria-hidden className="w-1.5 h-1.5 bg-ink/30 rounded-full animate-bounce [animation-delay:150ms]" />
                       <span aria-hidden className="w-1.5 h-1.5 bg-ink/30 rounded-full animate-bounce [animation-delay:300ms]" />
                     </span>
-                  ) : null)}
+                  ) : msg.role === 'assistant' && msg.content ? (
+                    <div className="flex flex-col gap-0.5">{renderMarkdown(msg.content)}</div>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}

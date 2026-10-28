@@ -1,69 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { api } from '@/lib/api';
+import { renderMarkdown } from '@/utils/markdown';
 
-/** Inline HTML helpers */
-function inlineHtml(text: string): string {
-  return text
-    .replace(/\u2014/g, '-')           // strip em dash
-    .replace(/\u2013/g, '-')           // strip en dash
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-}
-
-/**
- * Render markdown-ish review text into React elements.
- * Handles: **bold**, numbered lists (newline or inline "1. 2. 3."), blank-line paragraphs.
- */
-function renderMarkdown(raw: string) {
-  // Strip em/en dashes from the whole text first
-  const text = raw.replace(/\u2014/g, ' - ').replace(/\u2013/g, '-');
-
-  // Split into blocks on blank lines
-  const blocks = text.split(/\n\n+/);
-  const elements: React.ReactElement[] = [];
-
-  blocks.forEach((block, bi) => {
-    const trimmed = block.trim();
-
-    // Detect numbered list — either newline-separated OR inline "1. ... 2. ... 3. ..."
-    const inlineListMatch = /\b1\.\s/.test(trimmed) && /\b2\.\s/.test(trimmed);
-    const newlineListMatch = /^\d+\.\s/.test(trimmed) && trimmed.includes('\n');
-
-    if (inlineListMatch || newlineListMatch) {
-      // Split on numbered item boundaries
-      const items = trimmed
-        .split(/(?=\b\d+\.\s)/)
-        .map(s => s.replace(/^\d+\.\s*/, '').trim())
-        .filter(Boolean);
-
-      elements.push(
-        <ol key={bi} className="list-decimal list-outside ml-4 space-y-1.5 text-sm">
-          {items.map((item, ii) => (
-            <li key={ii} className="leading-relaxed pl-1"
-                dangerouslySetInnerHTML={{ __html: inlineHtml(item) }} />
-          ))}
-        </ol>
-      );
-      return;
-    }
-
-    // Heading-like line: starts with ** and ends with **
-    if (/^\*\*[^*]+\*\*[:\s]/.test(trimmed)) {
-      elements.push(
-        <p key={bi} className="text-sm leading-relaxed font-medium"
-           dangerouslySetInnerHTML={{ __html: inlineHtml(trimmed) }} />
-      );
-      return;
-    }
-
-    // Regular paragraph
-    elements.push(
-      <p key={bi} className="text-sm leading-relaxed"
-         dangerouslySetInnerHTML={{ __html: inlineHtml(trimmed) }} />
-    );
-  });
-
-  return elements;
-}
 
 export default function PortfolioReview() {
   const [review, setReview] = useState('');

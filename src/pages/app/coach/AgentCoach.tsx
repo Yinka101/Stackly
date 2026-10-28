@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useSession } from '@/lib/session';
 import { tokenStore, getApiBase, loadConfig } from '@/lib/api';
 import { Sparkles, ChevronRight, Clock, CheckCircle2, XCircle, AlertCircle, Bot } from 'lucide-react';
+import { renderMarkdown } from '@/utils/markdown';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -132,8 +133,8 @@ function PlanTimeline({ steps, status, summary, band }: { steps: PlanStep[]; sta
       </ol>
 
       {summary && (
-        <div className="px-4 py-4 bg-[var(--color-primary-light)] border-t border-[var(--color-border)]">
-          <p className="text-sm text-ink leading-relaxed">{summary}</p>
+        <div className="px-4 py-4 bg-primary/5 border-t border-primary/15">
+          <div className="flex flex-col gap-0.5">{renderMarkdown(summary)}</div>
         </div>
       )}
     </div>
