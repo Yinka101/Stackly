@@ -82,7 +82,7 @@ router.post('/stream', async (c) => {
   const session = c.get('session')!;
   const learnerId = session.ownerId;
 
-  const { allowed, retryAfterMs } = checkRateLimit(learnerId);
+  const { allowed, retryAfterMs } = checkRateLimit(learnerId, 'chat');
   if (!allowed) {
     return c.json(
       { error: `Too many requests. Try again in ${Math.ceil(retryAfterMs / 1000)}s.` },
@@ -157,7 +157,7 @@ router.post('/quiz', async (c) => {
   const session = c.get('session')!;
   const learnerId = session.ownerId;
 
-  const { allowed } = checkRateLimit(learnerId);
+  const { allowed } = checkRateLimit(learnerId, 'quiz');
   if (!allowed) return c.json({ error: 'Rate limited' }, 429);
 
   const body = await c.req.json<{ topic?: string }>().catch(() => ({}));
@@ -208,7 +208,7 @@ router.post('/explain', async (c) => {
   const session = c.get('session')!;
   const learnerId = session.ownerId;
 
-  const { allowed } = checkRateLimit(learnerId);
+  const { allowed } = checkRateLimit(learnerId, 'review');
   if (!allowed) return c.json({ error: 'Rate limited' }, 429);
 
   const body = await c.req.json<{
@@ -244,7 +244,7 @@ router.post('/review', async (c) => {
   const session = c.get('session')!;
   const learnerId = session.ownerId;
 
-  const { allowed } = checkRateLimit(learnerId);
+  const { allowed } = checkRateLimit(learnerId, 'review');
   if (!allowed) return c.json({ error: 'Rate limited' }, 429);
 
   if (!isConfigured()) return c.json({ review: OFFLINE_RESPONSES.review });

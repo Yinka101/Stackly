@@ -1,50 +1,61 @@
 /**
- * In-memory token-bucket rate limiter per learnerId.
- * 20 requests per minute per learner.
- * No external dependency needed for a hackathon — swap for Redis in production.
+ * In-memory token-bucket rate limiter.
+ * Keyed by `${learnerId}:${bucket}` so chat, quiz, and agent have independent limits.
  */
 
 interface Bucket {
   tokens: number;
-  lastRefill: number; // ms timestamp
+  lastRefill: number;
 }
 
-const RATE = 20;         // max requests per window
 const WINDOW_MS = 60_000; // 1 minute
 
-const buckets = new Map<string, Bucket>();
+// Per-bucket caps
+const CAPS: Record<string, number> = {
+  chat:  60, // chat stream — generous, each message = 1 token
+  quiz:  20,
+  review: 10,
+  agent: 15, // agent run — each run may call OpenAI multiple times server-side
+  default: 60,
+};
 
-export function checkRateLimit(learnerId: string): { allowed: boolean; retryAfterMs: number } {
-  const now = Date.now();
-  let bucket = buckets.get(learnerId);
+const store = new Map<string, Bucket>();
 
-  if (!bucket) {
-    bucket = { tokens: RATE - 1, lastRefill: now };
-    buckets.set(learnerId, bucket);
+export function checkRateLimit(
+  learnerId: string,
+  bucket: string = 'default',
+): { allowed: boolean; retryAfterMs: number } {
+  const rate = CAPS[bucket] ?? CAPS.default;
+  const key  = `${learnerId}:${bucket}`;
+  const now  = Date.now();
+
+  let b = store.get(key);
+  if (!b) {
+    b = { tokens: rate - 1, lastRefill: now };
+    store.set(key, b);
     return { allowed: true, retryAfterMs: 0 };
   }
 
-  // Refill proportionally to elapsed time
-  const elapsed = now - bucket.lastRefill;
-  const refill = Math.floor((elapsed / WINDOW_MS) * RATE);
+  // Proportional refill
+  const elapsed = now - b.lastRefill;
+  const refill  = Math.floor((elapsed / WINDOW_MS) * rate);
   if (refill > 0) {
-    bucket.tokens = Math.min(RATE, bucket.tokens + refill);
-    bucket.lastRefill = now;
+    b.tokens    = Math.min(rate, b.tokens + refill);
+    b.lastRefill = now;
   }
 
-  if (bucket.tokens <= 0) {
-    const retryAfterMs = WINDOW_MS - elapsed;
-    return { allowed: false, retryAfterMs: Math.max(0, retryAfterMs) };
+  if (b.tokens <= 0) {
+    return { allowed: false, retryAfterMs: Math.max(0, WINDOW_MS - elapsed) };
   }
 
-  bucket.tokens -= 1;
+  b.tokens -= 1;
   return { allowed: true, retryAfterMs: 0 };
 }
 
 // Prune stale buckets every 5 minutes
 setInterval(() => {
   const cutoff = Date.now() - WINDOW_MS * 5;
-  for (const [id, bucket] of buckets) {
-    if (bucket.lastRefill < cutoff) buckets.delete(id);
+  for (const [id, b] of store) {
+    if (b.lastRefill < cutoff) store.delete(id);
   }
 }, 5 * 60_000);
