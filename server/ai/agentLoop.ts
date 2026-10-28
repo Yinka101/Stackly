@@ -109,11 +109,12 @@ export async function runAgent(
 
   // Moderate input
   const mod = moderateInput(userMessage);
-  if (!mod.ok) {
-    const s = makeStep('error', 'I can\'t help with that', { detail: mod.reason });
+  if (!mod.safe) {
+    const reason = (mod as { reason?: string }).reason ?? 'I can\'t help with that.';
+    const s = makeStep('error', 'I can\'t help with that', { detail: reason });
     steps.push(s);
-    await persistSteps(ctx.planId, steps, 'failed', mod.reason ?? '');
-    return { planId: ctx.planId, steps, status: 'failed', summary: mod.reason ?? 'I can\'t help with that.' };
+    await persistSteps(ctx.planId, steps, 'failed', reason);
+    return { planId: ctx.planId, steps, status: 'failed', summary: reason };
   }
 
   // Step 1: understood
