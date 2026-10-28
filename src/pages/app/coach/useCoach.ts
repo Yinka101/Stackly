@@ -3,7 +3,7 @@
  * Each learner gets their own isolated context - no cross-learner data.
  */
 import { useState, useCallback, useRef } from 'react';
-import { tokenStore } from '@/lib/api';
+import { tokenStore, getApiBase, loadConfig } from '@/lib/api';
 
 export interface ChatMessage {
   id: string;
@@ -41,8 +41,10 @@ export function useCoach() {
     abortRef.current = ctrl;
 
     try {
+      await loadConfig();
       const token = tokenStore.get();
-      const res = await fetch('/api/ai/stream', {
+      const base = getApiBase().replace(/\/api$/, '');
+      const res = await fetch(`${base}/ai/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

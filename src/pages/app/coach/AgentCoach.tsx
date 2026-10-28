@@ -7,7 +7,7 @@
  */
 import { useState, useRef, useEffect } from 'react';
 import { useSession } from '@/lib/session';
-import { tokenStore } from '@/lib/api';
+import { tokenStore, getApiBase, loadConfig } from '@/lib/api';
 import { Sparkles, ChevronRight, Clock, CheckCircle2, XCircle, AlertCircle, Bot } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ const STARTERS: Record<string, string[]> = {
   ],
 };
 
-const BASE = import.meta.env.VITE_API_URL ?? '';
+// BASE is resolved at call-time via getApiBase() so config.json is respected
 
 // ── Step icon ─────────────────────────────────────────────────────────────────
 
@@ -182,7 +182,9 @@ export default function AgentCoach() {
 
   async function loadPastPlans() {
     try {
-      const res = await fetch(`${BASE}/agent/plans`, {
+      await loadConfig();
+      const base = getApiBase().replace(/\/api$/, '');
+      const res = await fetch(`${base}/agent/plans`, {
         headers: { Authorization: `Bearer ${tokenStore.get() ?? ''}` },
       });
       if (res.ok) {
@@ -203,7 +205,9 @@ export default function AgentCoach() {
     setInput('');
 
     try {
-      const res = await fetch(`${BASE}/agent/run`, {
+      await loadConfig();
+      const base = getApiBase().replace(/\/api$/, '');
+      const res = await fetch(`${base}/agent/run`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

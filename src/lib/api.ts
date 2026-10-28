@@ -15,7 +15,7 @@ let _resolvedBase: string = BAKED_BASE;
 
 // Load config.json once and cache it - subsequent calls use the cached value.
 let _configLoaded = false;
-async function loadConfig(): Promise<void> {
+export async function loadConfig(): Promise<void> {
   if (_configLoaded) return;
   _configLoaded = true;
   try {
