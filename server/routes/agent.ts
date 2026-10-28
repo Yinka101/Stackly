@@ -35,7 +35,7 @@ router.post('/run', requireLearner, async (c) => {
 
   // Rate limit: 10 agent runs per minute per learner
   const rl = checkRateLimit(learnerId, 'agent');
-  if (!rl.ok) return c.json({ error: 'Too many requests. Please slow down.' }, 429);
+  if (!rl.allowed) return c.json({ error: 'Too many requests. Please slow down.' }, 429);
 
   const body = await c.req.json() as { message?: string };
   const userMessage = (body.message ?? '').slice(0, 500).trim();

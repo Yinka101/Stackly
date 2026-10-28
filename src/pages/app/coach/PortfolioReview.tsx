@@ -1,6 +1,29 @@
 import { useState } from 'react';
 import { api } from '@/lib/api';
 
+/** Render a small subset of markdown: **bold**, numbered lists, blank-line paragraphs */
+function renderMarkdown(text: string) {
+  return text.split(/\n\n+/).map((block, bi) => {
+    // Numbered list block
+    if (/^\d+\./.test(block.trim())) {
+      const items = block.trim().split(/\n/).filter(Boolean);
+      return (
+        <ol key={bi} className="list-decimal list-inside space-y-1 mb-1">
+          {items.map((item, ii) => (
+            <li key={ii} className="leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: item.replace(/^\d+\.\s*/, '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+          ))}
+        </ol>
+      );
+    }
+    // Regular paragraph with inline bold
+    return (
+      <p key={bi} className="leading-relaxed mb-1"
+         dangerouslySetInnerHTML={{ __html: block.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }} />
+    );
+  });
+}
+
 export default function PortfolioReview() {
   const [review, setReview] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,8 +63,8 @@ export default function PortfolioReview() {
 
       {review && (
         <div className="space-y-4">
-          <div className="bg-primary/5 rounded-xl p-4 text-sm text-ink leading-relaxed whitespace-pre-wrap">
-            {review}
+          <div className="bg-primary/5 rounded-xl p-4 text-sm text-ink space-y-2">
+            {renderMarkdown(review)}
           </div>
           <button
             onClick={() => { void getReview(); }}
