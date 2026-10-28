@@ -33,6 +33,15 @@ export const learners = sqliteTable('learners', {
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
 });
 
+// ── Password reset tokens ────────────────────────────────────────────────────
+export const resetTokens = sqliteTable('reset_tokens', {
+  id: text('id').primaryKey(),          // random 32-byte hex token
+  userId: text('user_id').notNull(),    // users.id
+  expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+  usedAt: integer('used_at', { mode: 'timestamp_ms' }),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+});
+
 // ── HTTP-only session tokens ─────────────────────────────────────────────────
 export const sessions = sqliteTable('sessions', {
   id: text('id').primaryKey(),           // random 32-byte hex token

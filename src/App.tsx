@@ -20,6 +20,8 @@ import AddLearner       from '@/pages/onboarding/AddLearner';
 import LearnerSelect    from '@/pages/onboarding/LearnerSelect';
 import PinLogin         from '@/pages/onboarding/PinLogin';
 import ParentLogin      from '@/pages/onboarding/ParentLogin';
+import ForgotPassword  from '@/pages/onboarding/ForgotPassword';
+import ResetPassword   from '@/pages/onboarding/ResetPassword';
 
 // App screens
 import { PayPalLabPage } from '@/pages/paypal/PayPalLabPage';
@@ -47,7 +49,9 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<Landing />} />
-      <Route path="/login-parent" element={<ParentLogin />} />
+      <Route path="/login-parent"    element={<ParentLogin />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password"  element={<ResetPassword />} />
 
       {/* Onboarding - redirect away if already signed in */}
       <Route element={<RedirectIfAuthed />}>

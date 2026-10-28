@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { tokenStore, getApiBase } from '@/lib/api';
 import { useSession } from '@/lib/session';
 
@@ -123,6 +123,13 @@ export default function ParentLogin() {
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
+
+          <Link
+            to="/forgot-password"
+            className="text-center text-sm text-ink/50 hover:text-primary transition-colors"
+          >
+            Forgot password?
+          </Link>
         </form>
 
         {/* Demo shortcut */}

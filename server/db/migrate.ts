@@ -85,6 +85,13 @@ const DDL = [
     expires_at INTEGER NOT NULL,
     created_at INTEGER NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS reset_tokens (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id),
+    expires_at INTEGER NOT NULL,
+    used_at INTEGER,
+    created_at INTEGER NOT NULL
+  )`,
   `CREATE TABLE IF NOT EXISTS holdings (
     id TEXT PRIMARY KEY,
     learner_id TEXT NOT NULL REFERENCES learners(id),

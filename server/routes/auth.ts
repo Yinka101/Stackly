@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
 import { db } from '../db/index.js';
-import { families, users, learners } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { families, users, learners, resetTokens } from '../db/schema.js';
+import { eq, and, gt } from 'drizzle-orm';
 import { hashSecret, createSession, deleteSession, sessionCookie, clearCookie, COOKIE_NAME } from '../utils/auth.js';
 import { nanoid } from '../utils/nanoid.js';
 import { sessionMiddleware, requireParent, requireAuth } from '../middleware/session.js';
+import { randomBytes } from 'node:crypto';
 
 const router = new Hono();
 router.use('*', sessionMiddleware);
@@ -171,6 +172,96 @@ router.post('/logout', async (c) => {
   }
   if (token) await deleteSession(token);
   return c.json({ ok: true }, 200, { 'Set-Cookie': clearCookie() });
+});
+
+// ── POST /auth/forgot-password ───────────────────────────────────────────────
+// Body: { email }
+// Always returns 200 to avoid email enumeration.
+router.post('/forgot-password', async (c) => {
+  const body = await c.req.json().catch(() => ({})) as { email?: string };
+  const email = (body.email ?? '').trim().toLowerCase();
+
+  if (!email) return c.json({ ok: true }); // silent
+
+  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (!user) return c.json({ ok: true }); // silent — don't reveal account existence
+
+  // Generate a secure 32-byte token, expires in 1 hour
+  const token = randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + 60 * 60 * 1000;
+  await db.insert(resetTokens).values({
+    id: token,
+    userId: user.id,
+    expiresAt: new Date(expiresAt),
+    createdAt: new Date(),
+  });
+
+  // Send email via Resend
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) {
+    const appUrl = process.env.APP_URL ?? 'https://stackly-web.onrender.com';
+    const resetUrl = `${appUrl}/reset-password?token=${token}`;
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Stackly <noreply@stackly.app>',
+        to: email,
+        subject: 'Reset your Stackly password',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+            <h1 style="font-size:24px;color:#1a1a1a">Reset your password</h1>
+            <p style="color:#555">Someone (hopefully you) asked to reset the password for your Stackly account.</p>
+            <a href="${resetUrl}"
+               style="display:inline-block;margin:16px 0;padding:12px 24px;background:#2d7a4f;color:#fff;
+                      border-radius:8px;text-decoration:none;font-weight:bold">
+              Reset password
+            </a>
+            <p style="color:#999;font-size:13px">This link expires in 1 hour. If you did not request this, you can safely ignore this email.</p>
+          </div>
+        `,
+      }),
+    });
+  }
+
+  console.log('[auth] password reset token created for user=%s (email sent=%s)', user.id, !!resendKey);
+  return c.json({ ok: true });
+});
+
+// ── POST /auth/reset-password ────────────────────────────────────────────────
+// Body: { token, password }
+router.post('/reset-password', async (c) => {
+  const body = await c.req.json().catch(() => ({})) as { token?: string; password?: string };
+  const { token, password } = body;
+
+  if (!token || !password) return c.json({ error: 'token and password required' }, 400);
+  if (password.length < 8) return c.json({ error: 'Password must be at least 8 characters' }, 400);
+
+  // Find valid, unused, non-expired token
+  const [row] = await db
+    .select()
+    .from(resetTokens)
+    .where(and(
+      eq(resetTokens.id, token),
+      gt(resetTokens.expiresAt, new Date()),
+    ))
+    .limit(1);
+
+  if (!row) return c.json({ error: 'This link has expired or already been used. Please request a new one.' }, 400);
+  if (row.usedAt) return c.json({ error: 'This link has already been used. Please request a new one.' }, 400);
+
+  // Update password
+  const passwordHash = hashSecret(password);
+  await db.update(users).set({ passwordHash }).where(eq(users.id, row.userId));
+
+  // Mark token used
+  await db.update(resetTokens).set({ usedAt: new Date() }).where(eq(resetTokens.id, token));
+
+  console.log('[auth] password reset completed for user=%s', row.userId);
+  return c.json({ ok: true });
 });
 
 export default router;
