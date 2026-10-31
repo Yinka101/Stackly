@@ -37,7 +37,11 @@ app.use('*', cors({
   origin: (origin) => {
     if (!allowedOrigins) return origin ?? '*';
     if (!origin) return allowedOrigins[0];
-    return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+    // always allow Render subdomains and the custom domain
+    if (!origin) return allowedOrigins[0];
+    const alwaysAllow = ['onrender.com', 'stackly.com.ng'];
+    if (alwaysAllow.some(h => origin.endsWith(h))) return origin;
+    return allowedOrigins.includes(origin) ? origin : null;
   },
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Cookie', 'Authorization'],
