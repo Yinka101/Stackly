@@ -201,6 +201,8 @@ router.post('/forgot-password', async (c) => {
   const appUrl = process.env.APP_URL ?? 'https://stackly.com.ng';
   const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
+  console.log('[auth] forgot-password: user=%s resendKey=%s appUrl=%s', user.id, resendKey ? 'set' : 'MISSING', appUrl);
+
   if (resendKey) {
     try {
       const res = await fetch('https://api.resend.com/emails', {
