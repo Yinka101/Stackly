@@ -198,36 +198,51 @@ router.post('/forgot-password', async (c) => {
 
   // Send email via Resend
   const resendKey = process.env.RESEND_API_KEY;
+  const appUrl = process.env.APP_URL ?? 'https://stackly.com.ng';
+  const resetUrl = `${appUrl}/reset-password?token=${token}`;
+
   if (resendKey) {
-    const appUrl = process.env.APP_URL ?? 'https://stackly-web.onrender.com';
-    const resetUrl = `${appUrl}/reset-password?token=${token}`;
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Stackly <onboarding@resend.dev>',
-        to: email,
-        subject: 'Reset your Stackly password',
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-            <h1 style="font-size:24px;color:#1a1a1a">Reset your password</h1>
-            <p style="color:#555">Someone (hopefully you) asked to reset the password for your Stackly account.</p>
-            <a href="${resetUrl}"
-               style="display:inline-block;margin:16px 0;padding:12px 24px;background:#2d7a4f;color:#fff;
-                      border-radius:8px;text-decoration:none;font-weight:bold">
-              Reset password
-            </a>
-            <p style="color:#999;font-size:13px">This link expires in 1 hour. If you did not request this, you can safely ignore this email.</p>
-          </div>
-        `,
-      }),
-    });
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Stackly <onboarding@resend.dev>',
+          to: [email],
+          subject: 'Reset your Stackly password',
+          html: `
+            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+              <h1 style="font-size:24px;color:#1a1a1a">Reset your Stackly password</h1>
+              <p style="color:#555">Someone (hopefully you) asked to reset the password for your Stackly account.</p>
+              <a href="${resetUrl}"
+                 style="display:inline-block;margin:16px 0;padding:12px 24px;background:#2d7a4f;color:#fff;
+                        border-radius:8px;text-decoration:none;font-weight:bold">
+                Reset password
+              </a>
+              <p style="color:#999;font-size:13px">This link expires in 1 hour. If you did not request a reset, you can safely ignore this email.</p>
+              <p style="color:#ccc;font-size:11px">Stackly - money school for kids</p>
+            </div>
+          `,
+        }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('[auth] Resend error status=%s body=%j', res.status, result);
+      } else {
+        console.log('[auth] Reset email sent id=%s to=%s', (result as { id?: string }).id, email);
+      }
+    } catch (err) {
+      console.error('[auth] Resend fetch failed:', err);
+    }
+  } else {
+    // No API key — log the link so admin can share it manually
+    console.warn('[auth] RESEND_API_KEY not set. Reset link for %s: %s', email, resetUrl);
   }
 
-  console.log('[auth] password reset token created for user=%s (email sent=%s)', user.id, !!resendKey);
+  console.log('[auth] password reset token created for user=%s', user.id);
   return c.json({ ok: true });
 });
 

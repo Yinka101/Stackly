@@ -48,7 +48,7 @@ export default function AppLayout() {
              aria-label="Main navigation">
         {/* Logo - links back to landing page */}
         <a
-          href="https://stackly-web.onrender.com"
+          href="https://stackly.com.ng"
           className="flex items-center gap-2 px-3 mb-8 hover:opacity-80 transition-opacity"
           aria-label="Stackly home"
         >
@@ -107,7 +107,7 @@ export default function AppLayout() {
         {/* Mobile top bar */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-ink/8">
           <a
-            href="https://stackly-web.onrender.com"
+            href="https://stackly.com.ng"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             aria-label="Stackly home"
           >
