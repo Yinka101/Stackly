@@ -10,6 +10,45 @@ interface QuizQuestion {
 
 const TOPICS = ['compound growth', 'diversification', 'risk and reward', 'index funds', 'PayPal fees', 'spotting scams'];
 
+const FALLBACK_QUESTIONS: Record<string, QuizQuestion> = {
+  'compound growth': {
+    question: 'What does compound growth mean?',
+    options: ['Earning interest on your interest', 'Buying shares in a company', 'Paying monthly fees', 'Opening a savings account'],
+    correctIndex: 0,
+    explanation: 'Compound growth means your earnings also earn more over time - like a snowball that gets bigger as it rolls downhill.',
+  },
+  'diversification': {
+    question: 'Why do investors spread money across different assets?',
+    options: ['To reduce risk if one investment falls', 'To earn more fees', 'To avoid paying taxes', 'To buy more of one stock'],
+    correctIndex: 0,
+    explanation: 'Diversification reduces risk. If one investment drops, others may hold steady or rise, protecting your overall portfolio.',
+  },
+  'risk and reward': {
+    question: 'What is the general relationship between risk and reward in investing?',
+    options: ['Higher risk usually offers higher potential reward', 'Lower risk always gives higher reward', 'Risk and reward are unrelated', 'Only large companies have risk'],
+    correctIndex: 0,
+    explanation: 'Higher-risk investments can offer bigger returns, but also bigger losses. Lower-risk options are more stable but grow more slowly.',
+  },
+  'index funds': {
+    question: 'What does an index fund track?',
+    options: ['A group of stocks representing a market or sector', 'A single company\'s shares', 'Government bonds only', 'Real estate prices'],
+    correctIndex: 0,
+    explanation: 'An index fund tracks a collection of stocks (like the S&P 500) giving you broad market exposure without picking individual stocks.',
+  },
+  'PayPal fees': {
+    question: 'When does PayPal typically charge a fee to the seller?',
+    options: ['When receiving a payment for goods or services', 'When sending money to a friend', 'When checking your balance', 'When logging in'],
+    correctIndex: 0,
+    explanation: 'PayPal charges sellers a small percentage (usually around 2-3%) when they receive payments for goods or services.',
+  },
+  'spotting scams': {
+    question: 'Which of these is a common sign of an online scam?',
+    options: ['Urgency - "Act now or lose your money!"', 'A company asking you to verify your identity', 'A website with a padlock in the address bar', 'An email confirming your purchase'],
+    correctIndex: 0,
+    explanation: 'Scammers create urgency to stop you thinking clearly. Legitimate businesses never pressure you to act immediately or risk losing money.',
+  },
+};
+
 export default function QuizCard() {
   const [topic, setTopic] = useState(TOPICS[0]);
   const [quiz, setQuiz] = useState<QuizQuestion | null>(null);
@@ -24,12 +63,7 @@ export default function QuizCard() {
       const data = await api.post<QuizQuestion>('/ai/quiz', { topic });
       setQuiz(data);
     } catch {
-      setQuiz({
-        question: 'What does compound growth mean?',
-        options: ['Earning interest on interest', 'Buying shares', 'Paying fees', 'Opening a bank account'],
-        correctIndex: 0,
-        explanation: 'Compound growth means your earnings also earn more - like a snowball getting bigger as it rolls.',
-      });
+      setQuiz(FALLBACK_QUESTIONS[topic] ?? FALLBACK_QUESTIONS['compound growth']);
     } finally {
       setLoading(false);
     }

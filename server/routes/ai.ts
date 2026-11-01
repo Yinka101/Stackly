@@ -20,6 +20,21 @@ const router = new Hono();
 router.use('*', sessionMiddleware);
 router.use('*', requireLearner);
 
+// ── offline quiz bank ─────────────────────────────────────────────────────────
+const OFFLINE_QUIZ_BANK: Record<string, { question: string; options: string[]; correctIndex: number; explanation: string }> = {
+  'compound growth':  { question: 'What does compound growth mean?', options: ['Earning interest on your interest', 'Buying shares', 'Paying fees', 'Opening an account'], correctIndex: 0, explanation: 'Compound growth means your earnings also earn more over time.' },
+  'diversification':  { question: 'Why spread money across different assets?', options: ['To reduce risk if one investment falls', 'To earn more fees', 'To avoid taxes', 'To buy one stock more'], correctIndex: 0, explanation: 'Diversification reduces risk - if one investment drops, others may hold steady.' },
+  'risk and reward':  { question: 'What is the general relationship between risk and potential reward?', options: ['Higher risk, higher potential reward', 'Lower risk, higher reward', 'They are unrelated', 'Only large companies have risk'], correctIndex: 0, explanation: 'Higher-risk investments can offer bigger returns but also bigger losses.' },
+  'index funds':      { question: 'What does an index fund track?', options: ['A group of stocks representing a market', 'One company only', 'Government bonds only', 'Real estate prices'], correctIndex: 0, explanation: 'An index fund tracks a collection of stocks, giving broad market exposure.' },
+  'PayPal fees':      { question: 'When does PayPal charge a fee to the seller?', options: ['When receiving payment for goods or services', 'When sending to a friend', 'When checking balance', 'When logging in'], correctIndex: 0, explanation: 'PayPal charges sellers a small percentage when they receive payments for goods or services.' },
+  'spotting scams':   { question: 'Which is a common sign of an online scam?', options: ['"Act now or lose your money!"', 'A padlock in the address bar', 'A purchase confirmation email', 'A company verifying your identity'], correctIndex: 0, explanation: 'Scammers create urgency to stop you thinking clearly. Legitimate businesses never pressure you to act immediately.' },
+};
+
+function offlineQuiz(topic: string) {
+  const key = Object.keys(OFFLINE_QUIZ_BANK).find(k => topic.toLowerCase().includes(k.toLowerCase())) ?? 'compound growth';
+  return OFFLINE_QUIZ_BANK[key];
+}
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 async function getLearnerContext(learnerId: string): Promise<string> {
@@ -163,7 +178,7 @@ router.post('/quiz', async (c) => {
   const body = await c.req.json<{ topic?: string }>().catch(() => ({}));
   const topic = (body.topic ?? 'investing basics').slice(0, 200);
 
-  if (!isConfigured()) return c.json(JSON.parse(OFFLINE_RESPONSES.quiz));
+  if (!isConfigured()) return c.json(offlineQuiz(topic));
 
   const learnerRows = await db.select().from(learners).where(eq(learners.id, learnerId)).limit(1);
   const band = (learnerRows[0]?.band ?? 'builders') as Band;
@@ -199,7 +214,7 @@ No markdown, no extra text. The explanation should be encouraging and teach the 
     }
     return c.json(parsed);
   } catch {
-    return c.json(JSON.parse(OFFLINE_RESPONSES.quiz));
+    return c.json(offlineQuiz(topic));
   }
 });
 
