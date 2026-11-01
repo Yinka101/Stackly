@@ -2,7 +2,6 @@
 
 > A financial literacy platform that teaches children how PayPal works and how investing works, through age-adapted lessons, a paper-trading portfolio, and an AI coach that can propose real purchases for parent approval.
 
-Built with [Arc Studio](https://studio.arc.io)
 
 **Live site:** https://stackly.com.ng
 **API health:** https://stackly-a1ke.onrender.com/health
@@ -188,7 +187,6 @@ COACH_BASE_URL=https://api.openai.com/v1
 |-------------|------|
 | **GPT-4o-mini** (OpenAI) | Powers Coach chat, quiz generator, concept explainer, portfolio reviewer, and the agentic commerce loop |
 | **OpenAI function calling** | Agent loop: model decides which tool to call (`list_kits`, `create_purchase_request`, `get_order_status`, `list_recent_activity`), max 6 rounds, result written to DB so the parent sees a readable plan timeline |
-| **Arc Studio** | End-to-end development environment: designed all screens, wrote and audited all server code, generated tests, and authored this submission |
 | **System-prompt factory** | Band-specific prompts (Sprouts / Builders / Investors) with hard financial-advice prohibition and lexical constraints baked in |
 | **Input/output moderator** | Strips PII patterns, blocks requests for advice on specific securities, and catches adversarial jailbreak attempts before they reach the model |
 
