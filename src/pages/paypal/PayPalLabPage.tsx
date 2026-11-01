@@ -2,7 +2,8 @@
  * PayPalLabPage - the learner-facing PayPal Lab.
  * Four missions unlocked sequentially. Parents see approval cards.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/lib/session';
 import { GuidedSimMission } from './GuidedSimMission';
 import { CheckoutMission } from './CheckoutMission';
@@ -73,6 +74,21 @@ export function PayPalLabPage() {
   const { user } = useSession();
   const [active, setActive] = useState<ActiveMission>(null);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
+  const [returnState, setReturnState] = useState<'captured' | 'cancelled' | null>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Handle PayPal redirect back after checkout
+  useEffect(() => {
+    if (searchParams.get('capture') === 'true') {
+      setReturnState('captured');
+      setCompleted(prev => new Set([...prev, 1, 2, 3]));
+      navigate('/app/paypal', { replace: true });
+    } else if (searchParams.get('cancelled') === 'true') {
+      setReturnState('cancelled');
+      navigate('/app/paypal', { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const band = (user?.band ?? 'builders');
   const learnerId = user?.id ?? '';
@@ -142,6 +158,22 @@ export function PayPalLabPage() {
           Learn how PayPal works by doing it yourself - safely, with practice money.
         </p>
       </div>
+
+      {/* PayPal return banners */}
+      {returnState === 'captured' && (
+        <div className="rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2"
+             style={{ backgroundColor: '#dcfce7', color: '#166534' }}>
+          <span>🎉</span>
+          <span>Payment complete! Your Practice Dollars have been credited. Mission 3 done!</span>
+        </div>
+      )}
+      {returnState === 'cancelled' && (
+        <div className="rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2"
+             style={{ backgroundColor: '#fef9c3', color: '#854d0e' }}>
+          <span>↩️</span>
+          <span>Checkout cancelled. You can try Mission 3 again any time.</span>
+        </div>
+      )}
 
       {/* Disclaimer */}
       <div className="bg-[var(--accent)]/15 border border-[var(--accent)]/30 rounded-xl px-4 py-2 text-sm text-[var(--ink)]">

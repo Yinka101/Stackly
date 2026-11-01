@@ -118,6 +118,13 @@ export async function createOrder(
     body: JSON.stringify({
       intent: 'CAPTURE',
       purchase_units: units,
+      application_context: {
+        brand_name: 'Stackly',
+        landing_page: 'LOGIN',
+        user_action: 'PAY_NOW',
+        return_url: `${process.env.APP_URL ?? 'https://stackly.com.ng'}/app/paypal?capture=true`,
+        cancel_url: `${process.env.APP_URL ?? 'https://stackly.com.ng'}/app/paypal?cancelled=true`,
+      },
     }),
   });
 
