@@ -60,11 +60,11 @@ graph TD
 
 **Agent purchase flow:**
 1. Learner types "help me start a lemonade stand" in the Coach
-2. `POST /agent/run` runs the agent loop, calls `list_kits`, selects the Starter Kit, calls `create_purchase_request` (writes a `pending_agent` row; no PayPal call yet)
+2. `POST /agent/run` runs the agent loop, calls `list_kits`, selects the Starter Kit, calls `create_purchase_request` (writes a `pending_agent` row)
 3. Parent sees the request in **Family - Approvals**, reads the plan, approves
-4. Server calls PayPal `POST /v2/checkout/orders` and returns a checkout URL
-5. Parent completes PayPal checkout; webhook fires `CHECKOUT.ORDER.APPROVED`
-6. Learner receives their Practice Dollars; no child ever touches a payment form
+4. Server calls PayPal `POST /v2/checkout/orders` to create the order record
+5. Learner clicks "Complete Practice Checkout" - server runs simulated capture, awards Practice Dollars instantly
+6. No real money moves, no PayPal login required - teaches the full lifecycle safely
 
 ---
 
@@ -74,7 +74,7 @@ graph TD
 |------|-------------|
 | **Lessons** | 14 lessons x 3 reading levels (Sprouts / Builders / Investors), XP and streak tracking |
 | **Paper trading** | Synthetic CC0 price data, buy/sell with reflections, portfolio donut, performance chart, Time Replay mode |
-| **PayPal Lab** | 4 missions: send money, receive money, behind-the-scenes SSE event stream, spot the scam game - all sandbox, parent-approved |
+| **PayPal Lab** | 4 missions: send money, request money, simulated checkout (full Orders v2 lifecycle, no real PayPal login needed, no real money moves), spot the scam game |
 | **Coach (Penny)** | Band-adapted chat, quiz, concept explainer, portfolio review; rate-limited per bucket, input/output moderated |
 | **Coach Agent** | Agentic commerce: propose plan, pick kit, queue for parent approval, full audit log |
 | **Family dashboard** | Weekly learner summary, approvals queue, spending cap, Coach toggle, reading level override, conversation starters, GDPR-style export and delete |
@@ -170,14 +170,9 @@ COACH_BASE_URL=https://api.openai.com/v1
 | Ben | Builders (11-14) | `2222` |
 | Ivy | Investors (15-24) | `3333` |
 
-### PayPal sandbox cards
-
-| Card | Number | Expiry | CVV |
-|------|--------|--------|-----|
-| Visa | `4032035105373942` | `01/2030` | `123` |
-| Mastercard | `5425233430109903` | `02/2030` | `123` |
-
-> **For judges:** The AI Coach and Agent require `OPENAI_API_KEY` to be set on the `stackly-api` Render service. Without it the Coach falls back to offline keyword-matched answers and the Agent cannot call the LLM. Set it in Render dashboard - stackly-api - Environment. GPT-4o-mini is the default; any OpenAI-compatible key works.
+> **For judges:** The AI Coach and Agent require `OPENAI_API_KEY` to be set on the `stackly-api` Render service. Without it the Coach falls back to offline keyword-matched answers and the Agent cannot call the LLM. Set it in Render dashboard - stackly-api - Environment. GPT-4o-mini is the default.
+>
+> Mission 3 (Pay at a Checkout) uses a simulated capture - no PayPal login is needed and no real money moves. Complete the checkout by clicking "Complete Practice Checkout" after parent approval.
 
 ---
 
@@ -228,13 +223,13 @@ To deploy your own instance:
 
 ## Roadmap
 
-1. Push notifications - WebSockets or SSE for real-time parent approval alerts
-2. Curriculum expansion - budgeting, taxes, credit, compound interest modules
-3. Live price data - opt-in delayed feed with explicit licensing
-4. Multi-language - i18n for Spanish, French, Portuguese
-5. Accessibility audit - full WCAG 2.2 AA certification
-6. Parental controls app - dedicated parent mobile view with spending history
-7. School edition - class codes, teacher dashboard, progress reports
+1. Push notifications for real-time parent approval alerts
+2. Curriculum expansion - budgeting, taxes, credit scores, compound interest
+3. Live (delayed) price data with explicit CC0 licensing
+4. Multi-language support starting with Yoruba, Igbo, and Pidgin
+5. School edition - class codes, teacher dashboard, progress reports
+6. Mobile app for the parent approval flow
+7. Accessibility audit - full WCAG 2.2 AA certification
 
 ---
 
