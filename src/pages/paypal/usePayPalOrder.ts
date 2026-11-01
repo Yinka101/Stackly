@@ -118,6 +118,35 @@ export function usePayPalOrder() {
     }, 1000);
   }, [approveLink, orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const simulateCapture = useCallback(async () => {
+    if (!orderId) return;
+    setStage('capturing');
+    try {
+      const data = await request<{
+        status: string;
+        practiceDollarsAwarded?: number;
+        xpAwarded?: number;
+        alreadyCaptured?: boolean;
+        error?: string;
+      }>(`/paypal/orders/${orderId}/simulate-capture`, { method: 'POST' });
+
+      if (data.status === 'completed') {
+        setResult({
+          practiceDollarsAwarded: data.practiceDollarsAwarded,
+          xpAwarded: data.xpAwarded,
+          orderId: orderId ?? undefined,
+        });
+        setStage('completed');
+      } else {
+        setStage('error');
+        setError(data.error ?? 'Simulation failed.');
+      }
+    } catch (e) {
+      setStage('error');
+      setError((e as Error).message ?? 'Network error during simulation.');
+    }
+  }, [orderId]);
+
   const capture = useCallback(async () => {
     if (!orderId) return;
     setStage('capturing');
@@ -168,6 +197,6 @@ export function usePayPalOrder() {
 
   return {
     stage, orderId, approveLink, result, error,
-    createOrder, onParentApproved, setStageDeclined, openPopup, capture, reset,
+    createOrder, onParentApproved, setStageDeclined, openPopup, capture, simulateCapture, reset,
   };
 }

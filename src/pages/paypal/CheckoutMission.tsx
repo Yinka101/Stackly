@@ -8,7 +8,7 @@ import { usePayPalOrder } from './usePayPalOrder';
 import { useSse } from './useSse';
 import { BehindTheScenes } from './BehindTheScenes';
 import { request } from '@/utils/api';
-import { PayPalSDKButton } from './PayPalSDKButton';
+
 import type { AgeBand } from '@/lib/session';
 
 interface Kit {
@@ -184,19 +184,23 @@ export function CheckoutMission({ band, learnerId, onComplete, onBack }: Props) 
             </div>
           )}
 
-          {/* Approved - PayPal JS SDK buttons render inline (no redirect) */}
+          {/* Approved - simulate checkout (no real money, no PayPal login needed) */}
           {order.stage === 'approved' && order.orderId && (
             <div className="card flex flex-col gap-3">
               <p className="text-[var(--ink)] font-semibold">✅ Parent approved!</p>
               <p className="text-sm text-[var(--ink-muted)]">
-                Click the PayPal button below. A popup will open - sign in with your sandbox Personal account to pay.
+                This is a practice checkout. Click the button below to complete the simulated PayPal payment - no real money will move.
               </p>
-              <PayPalSDKButton
-                orderId={order.orderId}
-                onApprove={order.capture}
-                onCancel={order.reset}
-                onError={(msg) => { order.reset(); console.error('[checkout]', msg); }}
-              />
+              <div className="bg-[var(--accent)]/10 border border-[var(--accent)]/25 rounded-xl px-4 py-3 text-sm text-[var(--ink)]">
+                🧪 <strong>Sandbox mode:</strong> Completing this checkout awards Practice Dollars instantly. No PayPal account needed.
+              </div>
+              <button
+                onClick={() => void order.simulateCapture()}
+                className="py-3 rounded-xl font-bold text-white text-base"
+                style={{ backgroundColor: '#0070BA' }}
+              >
+                Complete Practice Checkout →
+              </button>
             </div>
           )}
 

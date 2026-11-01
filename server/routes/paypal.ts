@@ -213,6 +213,79 @@ router.post('/orders/:id/capture', requireParent, async (c) => {
   return c.json({ error: 'Capture not completed', captureStatus }, 402);
 });
 
+// ── POST /paypal/orders/:id/simulate-capture — learner: simulated checkout ───
+// Awards Practice Dollars without any real PayPal payment.
+// This is the correct model for a financial literacy app: teach the flow,
+// never charge real money.
+router.post('/orders/:id/simulate-capture', async (c) => {
+  const session = c.get('session');
+  if (!session) return c.json({ error: 'Unauthorised' }, 401);
+
+  const orderId = c.req.param('id');
+  const [order] = await db
+    .select()
+    .from(paypalOrders)
+    .where(eq(paypalOrders.id, orderId));
+
+  if (!order) return c.json({ error: 'Order not found' }, 404);
+
+  // Must belong to this learner or their parent
+  const isLearner = session.role === 'learner' && session.ownerId === order.learnerId;
+  const isParent  = session.role === 'parent'  && session.ownerId === order.parentId;
+  if (!isLearner && !isParent) return c.json({ error: 'Forbidden' }, 403);
+
+  // Idempotency
+  if (order.status === 'completed') {
+    return c.json({
+      status: 'completed',
+      alreadyCaptured: true,
+      practiceDollarsAwarded: order.practiceDollarsAwarded,
+      xpAwarded: order.xpAwarded,
+    });
+  }
+
+  // Must be approved before simulating
+  if (order.status !== 'approved' && order.status !== 'pending_agent') {
+    return c.json({ error: 'Order not approved yet' }, 409);
+  }
+
+  const now = new Date();
+  const simulatedCaptureId = `SIM-${Date.now()}`;
+
+  // Mark order completed
+  await db
+    .update(paypalOrders)
+    .set({ status: 'completed', captureId: simulatedCaptureId, completedAt: now })
+    .where(eq(paypalOrders.id, orderId));
+
+  // Award Practice Dollars + XP atomically
+  const { sql } = await import('drizzle-orm');
+  await db
+    .update(learners)
+    .set({
+      practiceDollars: sql`practice_dollars + ${order.practiceDollarsAwarded}`,
+      xp: sql`xp + ${order.xpAwarded}`,
+    })
+    .where(eq(learners.id, order.learnerId));
+
+  emitOrderEvent(orderId, {
+    type: 'completed',
+    label: '🎉 Practice checkout complete!',
+    detail: `${order.practiceDollarsAwarded} Practice Dollars awarded. No real money was moved.`,
+    tech: `simulate-capture → captureId: ${simulatedCaptureId}`,
+  });
+
+  console.log('[paypal] simulate-capture orderId=%s awarded %d PD + %d XP to learner %s',
+    orderId, order.practiceDollarsAwarded, order.xpAwarded, order.learnerId);
+
+  return c.json({
+    status: 'completed',
+    practiceDollarsAwarded: order.practiceDollarsAwarded,
+    xpAwarded: order.xpAwarded,
+    simulated: true,
+  });
+});
+
 // ── GET /paypal/pending — parent: list pending orders for family ──────────────
 router.get('/pending', requireParent, async (c) => {
   const session = c.get('session')!;
