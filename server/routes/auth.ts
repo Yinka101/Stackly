@@ -212,7 +212,7 @@ router.post('/forgot-password', async (c) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Stackly <onboarding@resend.dev>',
+          from: 'Stackly <noreply@stackly.com.ng>',
           to: [email],
           subject: 'Reset your Stackly password',
           html: `
