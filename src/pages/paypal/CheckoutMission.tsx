@@ -260,9 +260,10 @@ export function CheckoutMission({ band, learnerId, onComplete, onBack }: Props) 
               </div>
               <button
                 onClick={onComplete}
-                className="py-3 rounded-xl bg-[var(--primary)] text-white font-bold"
+                className="py-3 rounded-xl font-bold text-white text-base"
+                style={{ backgroundColor: '#2d7a4f' }}
               >
-                Continue →
+                Continue to Mission 4 →
               </button>
             </div>
           )}
