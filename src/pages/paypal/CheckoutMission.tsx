@@ -8,6 +8,7 @@ import { usePayPalOrder } from './usePayPalOrder';
 import { useSse } from './useSse';
 import { BehindTheScenes } from './BehindTheScenes';
 import { request } from '@/utils/api';
+import { PayPalSDKButton } from './PayPalSDKButton';
 import type { AgeBand } from '@/lib/session';
 
 interface Kit {
@@ -183,19 +184,19 @@ export function CheckoutMission({ band, learnerId, onComplete, onBack }: Props) 
             </div>
           )}
 
-          {/* Approved - ready to open popup */}
-          {order.stage === 'approved' && (
+          {/* Approved - PayPal JS SDK buttons render inline (no redirect) */}
+          {order.stage === 'approved' && order.orderId && (
             <div className="card flex flex-col gap-3">
               <p className="text-[var(--ink)] font-semibold">✅ Parent approved!</p>
               <p className="text-sm text-[var(--ink-muted)]">
-                Click the button below to open PayPal. Log in with a sandbox buyer account to complete the checkout.
+                Click the PayPal button below. A popup will open - sign in with your sandbox Personal account to pay.
               </p>
-              <button
-                onClick={order.openPopup}
-                className="py-3 rounded-xl bg-[#0070BA] text-white font-bold"
-              >
-                Open PayPal Checkout →
-              </button>
+              <PayPalSDKButton
+                orderId={order.orderId}
+                onApprove={order.capture}
+                onCancel={order.reset}
+                onError={(msg) => { order.reset(); console.error('[checkout]', msg); }}
+              />
             </div>
           )}
 
