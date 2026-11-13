@@ -218,8 +218,12 @@ router.post('/quiz', async (c) => {
   const { allowed } = checkRateLimit(learnerId, 'quiz');
   if (!allowed) return c.json({ error: 'Rate limited' }, 429);
 
-  const body = await c.req.json<{ topic?: string }>().catch(() => ({}));
+  const body = await c.req.json<{ topic?: string; avoid?: string[] }>().catch(() => ({}));
   const topic = (body.topic ?? 'investing basics').slice(0, 200);
+  const avoid = (Array.isArray(body.avoid) ? body.avoid : [])
+    .filter((q): q is string => typeof q === 'string')
+    .slice(-8)
+    .map((q) => q.slice(0, 200));
 
   if (!isConfigured()) return c.json(offlineQuiz(topic));
 
@@ -227,7 +231,26 @@ router.post('/quiz', async (c) => {
   const band = (learnerRows[0]?.band ?? 'builders') as Band;
 
   const systemPrompt = buildSystemPrompt(band);
-  const userPrompt = `Generate a quiz question about: "${topic}".
+  const angles = [
+    'a real-life everyday scenario with simple numbers',
+    'a "which of these is true" concept check',
+    'a short calculation the learner can do in their head',
+    'spotting the mistake or the myth in a statement',
+    'a vocabulary question about a key term',
+    'a "what would happen if" cause and effect question',
+    'a comparison between two choices',
+    'a story about a kid making a money decision',
+  ];
+  const styles = ['easy', 'medium', 'medium', 'challenging'];
+  const angle = angles[Math.floor(Math.random() * angles.length)];
+  const style = styles[Math.floor(Math.random() * styles.length)];
+  const avoidLine = avoid.length
+    ? `\nDo NOT repeat or closely rephrase any of these earlier questions:\n${avoid.map((q) => `- ${q}`).join('\n')}\n`
+    : '';
+
+  const userPrompt = `Generate ONE new quiz question about: "${topic}".
+Style: ${angle}. Difficulty: ${style}. Variation seed: ${Math.random().toString(36).slice(2, 8)}.${avoidLine}
+Make the three wrong options plausible, not silly. Put the correct answer in a random position.
 Respond with ONLY a JSON object in this exact shape:
 {
   "question": "...",
@@ -255,7 +278,15 @@ No markdown, no extra text. The explanation should be encouraging and teach the 
     if (!parsed.question || !Array.isArray(parsed.options) || parsed.options.length < 2) {
       throw new Error('invalid shape');
     }
-    return c.json(parsed);
+    // Shuffle options so the correct answer is not always first
+    const correctText = parsed.options[parsed.correctIndex];
+    const shuffled = [...parsed.options];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const newIndex = shuffled.indexOf(correctText);
+    return c.json({ ...parsed, options: shuffled, correctIndex: newIndex >= 0 ? newIndex : parsed.correctIndex });
   } catch {
     return c.json(offlineQuiz(topic));
   }

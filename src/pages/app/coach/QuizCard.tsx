@@ -72,14 +72,16 @@ export default function QuizCard() {
   const [quiz, setQuiz] = useState<QuizQuestion | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [asked, setAsked] = useState<Record<string, string[]>>({});
 
   const generate = async () => {
     setLoading(true);
     setQuiz(null);
     setSelected(null);
     try {
-      const data = await api.post<QuizQuestion>('/ai/quiz', { topic });
+      const data = await api.post<QuizQuestion>('/ai/quiz', { topic, avoid: asked[topic] ?? [] });
       setQuiz(data);
+      setAsked((prev) => ({ ...prev, [topic]: [...(prev[topic] ?? []), data.question].slice(-8) }));
     } catch {
       setQuiz(pickFallback(topic));
     } finally {
